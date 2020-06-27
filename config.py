@@ -4,7 +4,6 @@ __all__ = ['resnet18','se_resnet18']
 
 NET_NAME = 'se_resnet18'
 VERSION = 'v2.0'
-DEVICE = '5'
 DEVICE = '4'
 # Must be True when pre-training and inference
 PRE_TRAINED = True 
