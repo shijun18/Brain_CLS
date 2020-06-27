@@ -13,8 +13,8 @@ GPU_NUM = len(DEVICE.split(','))
 
 
 WEIGHT_PATH = {
-  'resnet18':'../ckpt/{}/'.format(VERSION),
-  'se_resnet18':'../ckpt/{}/'.format(VERSION),
+  'resnet18':'./ckpt/{}/'.format(VERSION),
+  'se_resnet18':'./ckpt/{}/'.format(VERSION),
   
 }
 
