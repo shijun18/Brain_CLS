@@ -2,9 +2,9 @@
 __all__ = ['resnet18','se_resnet18']
 
 
-NET_NAME = 'resnet18'
-VERSION = 'v1.0'
-DEVICE = '0'
+NET_NAME = 'se_resnet18'
+VERSION = 'v2.0'
+DEVICE = '5'
 # Must be True when pre-training and inference
 PRE_TRAINED = False 
 # 1,2,3,4
@@ -22,7 +22,7 @@ WEIGHT_PATH = {
 INIT_TRAINER = {
   'net_name':NET_NAME,
   'lr':1e-3, 
-  'n_epoch':40,
+  'n_epoch':100,
   'channels':1,
   'num_classes':2,
   'input_shape':(128,128),

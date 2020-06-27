@@ -1,5 +1,7 @@
+import sys
+sys.path.append("..")
 import torch.nn as nn
-from resnet import ResNet
+from model.resnet import ResNet
 
 
 class SELayer(nn.Module):
