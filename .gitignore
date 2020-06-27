@@ -3,4 +3,5 @@ dataset/
 txt_recorder/
 log/
 ckpt/
+.vscode/
 __pycache__/
