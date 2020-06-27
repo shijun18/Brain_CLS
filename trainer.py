@@ -35,7 +35,7 @@ class Pet_Classifier(object):
   - weight_path: weight path of pre-trained model
   '''
   def __init__(self,net_name=None,lr=1e-3,n_epoch=1,channels=1,num_classes=3,input_shape=None,crop=48,
-                batch_size=6,num_workers=0,device=None,pre_trained=False,weight_path=None): 
+                batch_size=6,num_workers=0,device=None,pre_trained=False,weight_path=None,weight_decay=0.,momentum=0.95): 
     super(Pet_Classifier,self).__init__()    
 
     self.net_name = net_name
@@ -57,6 +57,8 @@ class Pet_Classifier(object):
     # save the middle output
     self.feature_in = []
     self.feature_out = []
+    self.weight_decay = weight_decay
+    self.momentum = momentum
     
     os.environ['CUDA_VISIBLE_DEVICES'] = self.device
     
@@ -83,6 +85,8 @@ class Pet_Classifier(object):
     net = self.net
     lr = self.lr
     loss = self._get_loss(loss_fun,class_weight) 
+    weight_decay = self.weight_decay
+    momentum = self.momentum
     
     if len(self.device.split(',')) > 1:
       net = DataParallel(net)
@@ -111,7 +115,7 @@ class Pet_Classifier(object):
     loss = loss.cuda()
 
     # optimizer setting
-    optimizer = self._get_optimizer(optimizer,net,lr)
+    optimizer = self._get_optimizer(optimizer,net,lr,weight_decay,momentum)
     if self.pre_trained:
       checkpoint = torch.load(self.weight_path)
       optimizer.load_state_dict(checkpoint['optimizer']) 
@@ -415,12 +419,12 @@ class Pet_Classifier(object):
     return loss  
 
 
-  def _get_optimizer(self,optimizer,net,lr):
+  def _get_optimizer(self,optimizer,net,lr,weight_decay,momentum):
     if optimizer == 'Adam':
-      optimizer = torch.optim.Adam(net.parameters(),lr=lr)  
+      optimizer = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)  
 
     elif optimizer == 'SGD':
-      optimizer = torch.optim.SGD(net.parameters(),lr=lr,momentum=0.9)
+      optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
 
     return optimizer   
 
