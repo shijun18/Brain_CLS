@@ -3,7 +3,7 @@ sys.path.append('..')
 from PIL import Image
 from torch.utils.data import Dataset
 import torch
-import numpy as np
+
 
 class DataGenerator(Dataset):
   '''
@@ -35,5 +35,5 @@ class DataGenerator(Dataset):
     # Transform
     if self.transform is not None:
       image = self.transform(image)
-    sample = {'image':image, 'label':np.uint8(label)}
+    sample = {'image':image, 'label':int(label)}
     return sample
