@@ -1,4 +1,6 @@
-/*/.ipynb_checkpoints/
-/*/__pycache__/
-/txt_recorder/
-/log/
+.ipynb_checkpoints/
+
+txt_recorder/
+log/
+ckpt/
+__pycache__/
