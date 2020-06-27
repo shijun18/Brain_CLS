@@ -348,10 +348,12 @@ class Pet_Classifier(object):
 
 
   def _get_net(self,net_name):
-    if net_name == 'simple_net':
-      from model.simple_net import simple_net
-      net = simple_net(input_channels=self.channels,num_classes=self.num_classes)
-
+    if net_name == 'resnet18':
+      from model.resnet import resnet18
+      net = resnet18(input_channels=self.channels,num_classes=self.num_classes)
+    elif net_name == 'se_resnet18':
+      from model.se_resnet import se_resnet18
+      net = se_resnet18(input_channels=self.channels,num_classes=self.num_classes)
     return net  
 
 

@@ -1,8 +1,8 @@
  
-__all__ = ['simple_net']
+__all__ = ['resnet18','se_resnet18']
 
 
-NET_NAME = 'simple_net'
+NET_NAME = 'resnet18'
 VERSION = 'v1.0'
 DEVICE = '0'
 # Must be True when pre-training and inference
@@ -13,7 +13,8 @@ GPU_NUM = len(DEVICE.split(','))
 
 
 WEIGHT_PATH = {
-  'simple_net':'../ckpt/{}/'.format(VERSION),
+  'resnet18':'../ckpt/{}/'.format(VERSION),
+  'se_resnet18':'../ckpt/{}/'.format(VERSION),
   
 }
 
