@@ -13,7 +13,7 @@ class DataGenerator(Dataset):
   - label_dict: dict, file path as key, label as value
   - transform: the data augmentation methods
   '''
-  def __init__(self, path_list, label_dict, transform=None):
+  def __init__(self, path_list, label_dict=None, transform=None):
 
     self.path_list = path_list
     self.label_dict = label_dict
@@ -31,9 +31,14 @@ class DataGenerator(Dataset):
     image = Image.open(self.path_list[index]).convert('L')
     # print(self.path_list[index])
     # assert len(image.shape) == 3
-    label = self.label_dict[self.path_list[index]]    
-    # Transform
     if self.transform is not None:
       image = self.transform(image)
-    sample = {'image':image, 'label':int(label)}
+
+    if self.label_dict is not None:
+      label = self.label_dict[self.path_list[index]]    
+      # Transform
+      sample = {'image':image, 'label':int(label)}
+    else:
+      sample = {'image':image}
+    
     return sample

@@ -5,17 +5,17 @@ __all__ = ['resnet18','se_resnet18']
 NET_NAME = 'se_resnet18'
 VERSION = 'v2.0'
 DEVICE = '5'
+DEVICE = '4'
 # Must be True when pre-training and inference
-PRE_TRAINED = False 
+PRE_TRAINED = True 
 # 1,2,3,4
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
 
 
 WEIGHT_PATH = {
-  'resnet18':'./ckpt/{}/'.format(VERSION),
-  'se_resnet18':'./ckpt/{}/'.format(VERSION),
-  
+  'resnet18':'./ckpt/{}/epoch:95-train_loss:0.04389-val_loss:0.07643.pth'.format(VERSION),
+  'se_resnet18':'./ckpt/{}/epoch:78-train_loss:0.04824-val_loss:0.06200.pth'.format(VERSION),
 }
 
 # Arguments when trainer initial

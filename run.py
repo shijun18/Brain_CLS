@@ -36,7 +36,7 @@ def get_parameter_number(net):
 if __name__ == "__main__":
   
   parser = argparse.ArgumentParser()
-  parser.add_argument('-m', '--mode', default='train',choices=["train","inf"], 
+  parser.add_argument('-m', '--mode', default='train',choices=["train","test","inf"], 
                       help='choose the mode',type=str)
   parser.add_argument('-s', '--save', default='no',choices=['no','n','yes','y'], 
                       help='save the forward middle features or not',type=str)
@@ -66,22 +66,18 @@ if __name__ == "__main__":
     print('run time:%.4f'%(time.time()-start_time))
   ###############################################
   
-  # Inference
+  # Testing
   ###############################################
-  elif args.mode == 'inf':
-    if args.path is None:
-      test_path = list(label_dict.keys())[1600:] 
-      save_path = './analysis/result/{}_test.csv'.format(VERSION)
-    else:
-      test_path = [os.path.join(args.path,case) for case in os.listdir(args.path)]
-      save_path = './analysis/result/{}_submission.csv'.format(VERSION)
+  elif args.mode == 'test':
+    test_path = list(label_dict.keys())[1600:] 
+    save_path = './analysis/result/{}_test.csv'.format(VERSION)
     
     start_time = time.time()
     if args.save == 'no' or args.save == 'n':
-      result,_,_ = classifier.inference(test_path,label_dict)
+      result,_,_ = classifier.test(test_path,label_dict)
       print('run time:%.4f'%(time.time()-start_time))
     else:
-      result,feature_in,feature_out = classifier.inference(test_path,label_dict,hook_fn_forward=True)
+      result,feature_in,feature_out = classifier.test(test_path,label_dict,hook_fn_forward=True)
       print('run time:%.4f'%(time.time()-start_time))
       # save the avgpool output
       print(feature_in.shape,feature_out.shape)
@@ -95,8 +91,29 @@ if __name__ == "__main__":
         save_as_hdf5(feature_in[i],feature_path,'feature_in')   
         save_as_hdf5(feature_out[i],feature_path,'feature_out') 
     info = {}
+    info['id'] = test_path
+    info['label'] = result['true']
+    info['pred'] = result['pred']
+    info['prob'] = result['prob']
+    csv_file = pd.DataFrame(info)
+    csv_file.to_csv(save_path,index=False)
+  ###############################################
+
+  # Inference
+  ###############################################
+  elif args.mode == 'inf':
+    test_path = [os.path.join(args.path,case) for case in os.listdir(args.path)]
+    save_path = './analysis/result/{}_submission.csv'.format(VERSION)
+    
+    start_time = time.time()
+    
+    result = classifier.inference(test_path)
+    print('run time:%.4f'%(time.time()-start_time))
+
+    info = {}
     info['uuid'] = [os.path.splitext(os.path.basename(case))[0] for case in test_path]
     info['label'] = result['pred']
+    info['prob'] = result['prob']
     csv_file = pd.DataFrame(info)
     csv_file.to_csv(save_path,index=False)   
   ###############################################

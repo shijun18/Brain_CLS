@@ -19,7 +19,7 @@ import torch.distributed as dist
 
 class Pet_Classifier(object):
   '''
-  Control the training, evaluation, and inference process.
+  Control the training, evaluation, test and inference process.
   Args:
   - net_name: string, __all__ = [''].
   - lr: float, learning rate.
@@ -283,7 +283,7 @@ class Pet_Classifier(object):
       self.feature_out.append(output[i].cpu().numpy())  
   
 
-  def inference(self,test_path,label_dict,net=None,hook_fn_forward=False):
+  def test(self,test_path,label_dict,net=None,hook_fn_forward=False):
     
     if net is None:
       net = self.net
@@ -345,6 +345,54 @@ class Pet_Classifier(object):
  
     
     return result,np.array(self.feature_in),np.array(self.feature_out)
+  
+
+  
+  def inference(self,test_path,label_dict=None,net=None):
+    
+    if net is None:
+      net = self.net
+
+    net = net.cuda()
+    net.eval()
+    
+    test_transformer = transforms.Compose([
+      tr.Resize(size=self.input_shape),
+      tr.ToTensor()
+    ])
+
+    test_dataset = DataGenerator(test_path,transform=test_transformer)
+
+    test_loader = DataLoader(
+      test_dataset,
+      batch_size=self.batch_size,
+      shuffle=False,
+      num_workers=self.num_workers,
+      pin_memory=True
+    )
+    
+    result = {
+      'pred':[],
+      'prob':[]
+    }
+
+
+    with torch.no_grad():
+      for step,sample in enumerate(test_loader):
+        data = sample['image']
+        data = data.cuda()
+
+        output = net(data)
+        output = output.float() #N*C
+
+        result['pred'].extend(torch.argmax(output,1).detach().tolist())
+        output = F.softmax(output,dim=1)
+        result['prob'].extend(output.detach().tolist())
+        
+        torch.cuda.empty_cache()
+    
+    return result
+
 
 
   def _get_net(self,net_name):
