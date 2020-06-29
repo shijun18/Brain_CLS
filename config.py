@@ -6,7 +6,7 @@ NET_NAME = 'simple_net'
 VERSION = 'v4.1'
 DEVICE = '1'
 # Must be True when pre-training and inference
-PRE_TRAINED = True 
+PRE_TRAINED = False 
 # 1,2,3,4
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
@@ -41,8 +41,10 @@ INIT_TRAINER = {
   'num_workers':2,
   'device':DEVICE,
   'pre_trained':PRE_TRAINED,
-  'weight_path':WEIGHT_PATH[NET_NAME]
-}
+  'weight_path':WEIGHT_PATH[NET_NAME],
+  'weight_decay':0,
+  'momentum':0.9
+ }
 
 # Arguments when perform the trainer 
 SETUP_TRAINER = {
