@@ -4,8 +4,10 @@ from trainer import Pet_Classifier
 import pandas as pd
 from data_utils.csv_reader import csv_reader_single
 from config import INIT_TRAINER,SETUP_TRAINER,VERSION,CURRENT_FOLD
-
+from sklearn.metrics import classification_report
 import time
+import random
+
 
 def get_cross_validation(path_list,fold_num,current_fold):
   
@@ -54,22 +56,27 @@ if __name__ == "__main__":
   # Training
   ###############################################
   if args.mode == 'train':
-    path_list = list(label_dict.keys())[:1600] 
-    train_path,val_path = get_cross_validation(path_list,4,CURRENT_FOLD)
-    SETUP_TRAINER['train_path']=train_path
-    SETUP_TRAINER['val_path']=val_path
-    SETUP_TRAINER['label_dict']=label_dict
-    
-    start_time = time.time()
-    classifier.trainer(**SETUP_TRAINER)
+    path_list = list(label_dict.keys())[:1800]
+    random.shuffle(path_list)
+    for current_fold in range(1,6):
+    # train_path,val_path = get_cross_validation(path_list,4,CURRENT_FOLD)
+      train_path,val_path = get_cross_validation(path_list,5,current_fold)
+      SETUP_TRAINER['train_path']=train_path
+      SETUP_TRAINER['val_path']=val_path
+      SETUP_TRAINER['label_dict']=label_dict
+      start_time = time.time()
+      classifier.trainer(**SETUP_TRAINER)
       
+      classifier.n_epoch += INIT_TRAINER['n_epoch']
+      classifier.start_epoch += INIT_TRAINER['n_epoch']
+
     print('run time:%.4f'%(time.time()-start_time))
   ###############################################
   
   # Testing
   ###############################################
   elif args.mode == 'test':
-    test_path = list(label_dict.keys())[1600:] 
+    test_path = list(label_dict.keys())[1800:]
     save_path = './analysis/result/{}_test.csv'.format(VERSION)
     
     start_time = time.time()
@@ -90,6 +97,7 @@ if __name__ == "__main__":
         feature_path = os.path.join(feature_dir,name)
         save_as_hdf5(feature_in[i],feature_path,'feature_in')   
         save_as_hdf5(feature_out[i],feature_path,'feature_out') 
+    print(classification_report(result['true'], result['pred'], target_names=['AD','CN'],output_dict=False))
     info = {}
     info['id'] = test_path
     info['label'] = result['true']

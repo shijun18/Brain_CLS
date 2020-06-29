@@ -90,7 +90,7 @@ class Pet_Classifier(object):
     # dataloader setting
     train_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
-      tr.RandomRotation(degrees=30),
+      tr.RandomRotation(degrees=90),
       tr.RandomHorizontalFlip(p=0.5),
       tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
@@ -167,10 +167,10 @@ class Pet_Classifier(object):
           'state_dict':state_dict,
           'optimizer':optimizer.state_dict()
         }  
-        
+         
         file_name = 'epoch:{}-train_loss:{:.5f}-val_loss:{:.5f}.pth'.format(epoch,train_loss,val_loss) 
         save_path = os.path.join(output_dir,file_name)
-
+       
         torch.save(saver,save_path)
 
         
@@ -229,6 +229,9 @@ class Pet_Classifier(object):
     
     val_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
+      tr.RandomRotation(degrees=90),
+      tr.RandomHorizontalFlip(p=0.5),
+      tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
     ])
 
@@ -296,6 +299,9 @@ class Pet_Classifier(object):
     
     test_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
+      tr.RandomRotation(degrees=90),
+      tr.RandomHorizontalFlip(p=0.5),
+      tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
     ])
 
@@ -358,6 +364,9 @@ class Pet_Classifier(object):
     
     test_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
+      # tr.RandomRotation(degrees=90),
+      # tr.RandomHorizontalFlip(p=0.5),
+      # tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
     ])
 
@@ -402,6 +411,16 @@ class Pet_Classifier(object):
     elif net_name == 'se_resnet18':
       from model.se_resnet import se_resnet18
       net = se_resnet18(input_channels=self.channels,num_classes=self.num_classes)
+    elif net_name == 'se_resnet10':
+      from model.se_resnet import se_resnet10
+      net = se_resnet10(input_channels=self.channels,num_classes=self.num_classes)
+    elif net_name == 'simple_net':
+      from model.simple_net import simple_net
+      net = simple_net(input_channels=self.channels,num_classes=self.num_classes)
+    elif net_name == 'tiny_net':
+      from model.simple_net import tiny_net
+      net = tiny_net(input_channels=self.channels,num_classes=self.num_classes)
+    
     return net  
 
 

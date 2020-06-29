@@ -105,6 +105,15 @@ class SEBottleneck(nn.Module):
         return out
 
 
+
+
+def se_resnet10(**kwargs):
+    """Constructs a ResNet-18 model.
+    """
+    model = ResNet(SEBasicBlock, [1, 1, 1, 1], **kwargs)
+    return model
+
+
 def se_resnet18(**kwargs):
     """Constructs a ResNet-18 model.
     """
