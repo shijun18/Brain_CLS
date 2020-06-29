@@ -24,17 +24,17 @@ def BasicBlock(cin, cout, n):
 
 class SimpleNet(nn.Module):
 
-    def __init__(self,block,layers,num_features,num_classes=2,input_channels=1):
+    def __init__(self, block, layers, num_features, num_classes=2, input_channels=1):
         """
         Construct a SimpleNet
         """
         super(SimpleNet, self).__init__()
         self.backbone = nn.Sequential(
-            block(input_channels, num_features[0], layers[0]), 
-            block(num_features[0], num_features[1], layers[1]),  
-            block(num_features[1], num_features[2], layers[2]),  
-            block(num_features[2], num_features[3], layers[3]),  
-            block(num_features[3], num_features[4], layers[4]),  
+            block(input_channels, num_features[0], layers[0]),
+            block(num_features[0], num_features[1], layers[1]),
+            block(num_features[1], num_features[2], layers[2]),
+            block(num_features[2], num_features[3], layers[3]),
+            block(num_features[3], num_features[4], layers[4]),
         )
         self.bridge = nn.AdaptiveMaxPool2d((1, 1))
         self.cls = nn.Sequential(
@@ -52,12 +52,13 @@ class SimpleNet(nn.Module):
 def simple_net(**kwargs):
     """Constructs a simplenet with 6 layers. 
     """
-    model = SimpleNet(BasicBlock, [1,2,1,1,1], [64]*5, **kwargs)
+    model = SimpleNet(BasicBlock, [1, 2, 1, 1, 1], [64]*5, **kwargs)
     return model
 
 
 def tiny_net(**kwargs):
     """Constructs a simplenet with 6 layers. 
     """
-    model = SimpleNet(BasicBlock, [1,1,1,1,1], [16,32,64,64,128], **kwargs)
+    model = SimpleNet(BasicBlock, [1, 1, 1, 1, 1], [
+                      32, 32, 64, 64, 128], **kwargs)
     return model
