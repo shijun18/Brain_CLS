@@ -3,7 +3,6 @@ import argparse
 from trainer import Pet_Classifier
 import pandas as pd
 from data_utils.csv_reader import csv_reader_single
-from config import INIT_TRAINER,SETUP_TRAINER,VERSION,CURRENT_FOLD
 from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM, WEIGHT_PATH_LIST, TTA_TIMES
 
 import time
@@ -61,6 +60,9 @@ if __name__ == "__main__":
     ###############################################
     if args.mode == 'train_cross_val':
         path_list = list(label_dict.keys())
+        loss_list = []
+        acc_list = []
+
         for current_fold in range(1, FOLD_NUM+1):
             print("=== Training Fold ", current_fold, " ===")
             classifier = Pet_Classifier(**INIT_TRAINER)
@@ -76,9 +78,14 @@ if __name__ == "__main__":
             SETUP_TRAINER['cur_fold'] = current_fold
 
             start_time = time.time()
-            classifier.trainer(**SETUP_TRAINER)
+            val_loss, val_acc = classifier.trainer(**SETUP_TRAINER)
+            loss_list.append(val_loss)
+            acc_list.append(val_acc)
 
             print('run time:%.4f' % (time.time()-start_time))
+
+        print("Average loss is %f, average acc is %f" %
+              (np.mean(loss_list), np.mean(acc_list)))
     ###############################################
 
     # Training
@@ -159,25 +166,36 @@ if __name__ == "__main__":
     elif args.mode == 'inf_cross_val':
         test_path = [os.path.join(args.path, case)
                      for case in os.listdir(args.path)]
+        save_path_vote = './analysis/result/{}_submission_vote.csv'.format(
+            VERSION)
         save_path = './analysis/result/{}_submission.csv'.format(VERSION)
 
         result = {
             'pred': [],
+            'vote_pred': [],
             'prob': []
         }
-        all_output = []
+
+        all_prob_output = []
+        all_vote_output = []
 
         start_time = time.time()
         for i, weight_path in enumerate(WEIGHT_PATH_LIST):
+            print("Inference %d fold..." % i)
             INIT_TRAINER['weight_path'] = weight_path
             classifier = Pet_Classifier(**INIT_TRAINER)
 
-            output = classifier.inference_tta(test_path, TTA_TIMES)
-            all_output.append(output)
+            prob_output, vote_output = classifier.inference_tta(
+                test_path, TTA_TIMES)
+            all_prob_output.append(prob_output)
+            all_vote_output.append(vote_output)
 
-        avg_output = np.mean(all_output, axis=0)
+        avg_output = np.mean(all_prob_output, axis=0)
         result['prob'].extend(avg_output.tolist())
+
         result['pred'].extend(np.argmax(avg_output, 1).tolist())
+        result['vote_pred'].extend(
+            (np.sum(all_vote_output, 0) > FOLD_NUM//2).astype(int).tolist())
 
         print('run time:%.4f' % (time.time()-start_time))
 
@@ -188,4 +206,12 @@ if __name__ == "__main__":
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path, index=False)
+
+        info = {}
+        info['uuid'] = [os.path.splitext(os.path.basename(case))[
+            0] for case in test_path]
+        info['label'] = result['vote_pred']
+        info['prob'] = result['prob']
+        csv_file = pd.DataFrame(info)
+        csv_file.to_csv(save_path_vote, index=False)
     ###############################################

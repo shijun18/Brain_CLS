@@ -17,6 +17,8 @@ import torch.distributed as dist
 from PIL import Image
 from utils import remove_dir, make_dir
 
+from data_utils.transforms import RandomRotate
+
 # GPU version.
 
 
@@ -38,8 +40,9 @@ class Pet_Classifier(object):
     - weight_path: weight path of pre-trained model
     '''
 
-    def __init__(self, net_name=None, lr=1e-3, n_epoch=1, channels=1, num_classes=3, input_shape=None, crop=48,
-                 batch_size=6, num_workers=0, device=None, pre_trained=False, weight_path=None, weight_decay=0., momentum=0.95):
+    def __init__(self, net_name=None, gamma=0.1, lr=1e-3, n_epoch=1, channels=1, num_classes=3, input_shape=None, crop=48,
+                 batch_size=6, num_workers=0, device=None, pre_trained=False, weight_path=None, weight_decay=0.,
+                 momentum=0.95, mean=0.105393, std=0.203002, milestones=None):
         super(Pet_Classifier, self).__init__()
 
         self.net_name = net_name
@@ -63,6 +66,10 @@ class Pet_Classifier(object):
         self.feature_out = []
         self.weight_decay = weight_decay
         self.momentum = momentum
+        self.mean = mean
+        self.std = std
+        self.gamma = gamma
+        self.milestones = milestones
 
         os.environ['CUDA_VISIBLE_DEVICES'] = self.device
 
@@ -81,9 +88,12 @@ class Pet_Classifier(object):
 
         base_dir = output_dir
         output_dir = os.path.join(output_dir, "fold"+str(cur_fold))
+        log_dir = os.path.join(log_dir, "fold"+str(cur_fold))
 
         make_dir(base_dir)
         make_dir(output_dir)
+
+        remove_dir(log_dir)
         make_dir(log_dir)
 
         self.writer = SummaryWriter(log_dir)
@@ -102,10 +112,12 @@ class Pet_Classifier(object):
         # dataloader setting
         train_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.RandomRotation(degrees=90),
+            RandomRotate([-90, -45, 0, 45, 90]),
+            tr.RandomResizedCrop(self.input_shape, scale=(0.9, 1.1)),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
-            tr.ToTensor()
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         train_dataset = DataGenerator(
@@ -134,6 +146,9 @@ class Pet_Classifier(object):
             lr_scheduler = self._get_lr_scheduler(lr_scheduler, optimizer)
 
         # acc_threshold = 0.5
+        min_loss = 10.
+        max_acc = 0.
+
         for epoch in range(self.start_epoch, self.n_epoch):
             train_loss, train_acc = self._train_on_epoch(
                 epoch, net, loss, optimizer, train_loader)
@@ -165,6 +180,9 @@ class Pet_Classifier(object):
             if val_loss < self.loss_threshold:
                 self.loss_threshold = val_loss
 
+                min_loss = min(min_loss, val_loss)
+                max_acc = max(max_acc, val_acc)
+
                 if len(self.device.split(',')) > 1:
                     state_dict = net.module.state_dict()
                 else:
@@ -185,6 +203,7 @@ class Pet_Classifier(object):
                 torch.save(saver, save_path)
 
         self.writer.close()
+        return min_loss, max_acc
 
     def _train_on_epoch(self, epoch, net, criterion, optimizer, train_loader):
 
@@ -237,7 +256,8 @@ class Pet_Classifier(object):
 
         val_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.ToTensor()
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         val_dataset = DataGenerator(
@@ -363,7 +383,8 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.ToTensor()
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         test_dataset = DataGenerator(test_path, transform=test_transformer)
@@ -408,21 +429,26 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.RandomRotation(degrees=90),
+            RandomRotate([-90, -45, 0, 45, 90]),
+            tr.RandomResizedCrop(self.input_shape, scale=(0.9, 1.1)),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
-            tr.ToTensor()
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         test_dataset = DataGenerator(test_path, transform=None)
 
-        all_output = []
+        prob_output = []
+        vote_output = []
 
         with torch.no_grad():
             for step, sample in enumerate(test_dataset):
                 data = sample['image']
 
                 tta_output = []
+                binary_output = []
+
                 for _ in range(tta_times):
                     img = Image.fromarray(np.copy(data)).convert('L')
                     img_tensor = test_transformer(img)
@@ -431,14 +457,18 @@ class Pet_Classifier(object):
                     img_tensor = img_tensor.cuda()
 
                     output = net(img_tensor)
-                    output = output.float()  # N*C
-                    output = output.squeeze()
+                    output = F.softmax(output, dim=1)
 
-                    tta_output.append(output.cpu().numpy())
-                tta_output = np.mean(tta_output, axis=0)
-                all_output.append(tta_output)
+                    output = output.float().squeeze().cpu().numpy()
+                    tta_output.append(output)
 
-        return all_output
+                    binary_output.append(np.argmax(output))
+
+                prob_output.append(np.mean(tta_output, axis=0))
+                vote_output.append(np.sum(binary_output) >
+                                   int(np.floor(tta_times/2)))
+
+        return prob_output, vote_output
 
     def _get_net(self, net_name):
         if net_name == 'resnet18':
@@ -488,7 +518,9 @@ class Pet_Classifier(object):
         if lr_scheduler == 'ReduceLROnPlateau':
             lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
                                                                       mode='min', patience=5, verbose=True)
-
+        elif lr_scheduler == 'MultiStepLR':
+            lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+                optimizer, self.milestones, gamma=self.gamma)
         return lr_scheduler
 
     def _get_pre_trained(self, weight_path):
