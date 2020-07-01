@@ -112,8 +112,7 @@ class Pet_Classifier(object):
         # dataloader setting
         train_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-90, -45, 0, 45, 90]),
-            tr.RandomResizedCrop(self.input_shape, scale=(0.9, 1.1)),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
@@ -256,6 +255,9 @@ class Pet_Classifier(object):
 
         val_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize((self.mean,), (self.std,))
         ])
@@ -322,7 +324,11 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.ToTensor()
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         test_dataset = DataGenerator(
@@ -383,6 +389,9 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize((self.mean,), (self.std,))
         ])
@@ -429,8 +438,7 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-90, -45, 0, 45, 90]),
-            tr.RandomResizedCrop(self.input_shape, scale=(0.9, 1.1)),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),

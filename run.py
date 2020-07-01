@@ -49,7 +49,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Set data path & classifier
-    csv_path = './converter/shuffle_label.csv'
+    csv_path = './converter/shuffle_crop_label.csv'
     label_dict = csv_reader_single(csv_path, key_col='id', value_col='label')
 
     if args.mode != 'crs_val_train' and args.mode != 'inf_cross_val':
