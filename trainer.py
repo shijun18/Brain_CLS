@@ -14,6 +14,7 @@ import torchvision.transforms as tr
 from data_utils.data_loader import DataGenerator
 
 import torch.distributed as dist
+from data_utils.transforms import RandomRotate
 
 # GPU version.
 
@@ -94,7 +95,7 @@ class Pet_Classifier(object):
     # dataloader setting
     train_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
-      tr.RandomRotation(degrees=90),
+      RandomRotate([-135, -90, -45, 0, 45, 90,-135]),
       tr.RandomHorizontalFlip(p=0.5),
       tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
@@ -233,7 +234,7 @@ class Pet_Classifier(object):
     
     val_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
-      tr.RandomRotation(degrees=90),
+      RandomRotate([-135, -90, -45, 0, 45, 90,-135]),
       tr.RandomHorizontalFlip(p=0.5),
       tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
@@ -303,9 +304,10 @@ class Pet_Classifier(object):
     
     test_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
-      tr.RandomRotation(degrees=90),
-      tr.RandomHorizontalFlip(p=0.5),
-      tr.RandomVerticalFlip(p=0.5),
+      RandomRotate([-135, -90, -45, 0, 45, 90,-135]),
+      # tr.RandomRotation(degrees=90),
+      # tr.RandomHorizontalFlip(p=0.5),
+      # tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
     ])
 
@@ -368,9 +370,9 @@ class Pet_Classifier(object):
     
     test_transformer = transforms.Compose([
       tr.Resize(size=self.input_shape),
-      # tr.RandomRotation(degrees=90),
-      # tr.RandomHorizontalFlip(p=0.5),
-      # tr.RandomVerticalFlip(p=0.5),
+      RandomRotate([-135, -90, -45, 0, 45, 90,-135]),
+      tr.RandomHorizontalFlip(p=0.5),
+      tr.RandomVerticalFlip(p=0.5),
       tr.ToTensor()
     ])
 
@@ -424,7 +426,9 @@ class Pet_Classifier(object):
     elif net_name == 'tiny_net':
       from model.simple_net import tiny_net
       net = tiny_net(input_channels=self.channels,num_classes=self.num_classes)
-    
+    elif net_name == 'se_tiny_net':
+      from model.simple_net import se_tiny_net
+      net = se_tiny_net(input_channels=self.channels,num_classes=self.num_classes)
     return net  
 
 

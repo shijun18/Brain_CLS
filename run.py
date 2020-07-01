@@ -47,7 +47,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
   
   # Set data path & classifier
-  csv_path = './converter/shuffle_label.csv'
+  csv_path = './converter/shuffle_crop_label.csv'
   label_dict = csv_reader_single(csv_path,key_col='id',value_col='label')
   
   classifier = Pet_Classifier(**INIT_TRAINER)
@@ -55,9 +55,11 @@ if __name__ == "__main__":
     
   # Training
   ###############################################
+  
   if args.mode == 'train':
     path_list = list(label_dict.keys())[:1800]
     random.shuffle(path_list)
+    classifier.n_epoch =  classifier.start_epoch + INIT_TRAINER['n_epoch']
     for current_fold in range(1,6):
     # train_path,val_path = get_cross_validation(path_list,4,CURRENT_FOLD)
       train_path,val_path = get_cross_validation(path_list,5,current_fold)
@@ -120,8 +122,9 @@ if __name__ == "__main__":
 
     info = {}
     info['uuid'] = [os.path.splitext(os.path.basename(case))[0] for case in test_path]
-    info['label'] = result['pred']
-    info['prob'] = result['prob']
+    info['label'] =['AD' if case == 0 else 'CN' for case in result['pred']]
+    # info['label'] = result['pred']
+    # info['prob'] = result['prob']
     csv_file = pd.DataFrame(info)
     csv_file.to_csv(save_path,index=False)   
   ###############################################

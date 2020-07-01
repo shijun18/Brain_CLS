@@ -19,8 +19,8 @@ def vote_ensemble(csv_path_list,save_path,col='label'):
 
 if __name__ == "__main__":
   
-  save_path = './submission.csv'
-  csv_path_list = ['./result/v2.2_submission.csv','./result/v3.0_submission.csv','./result/v3.0.1_submission.csv',
-  './result/v3.0.2_submission.csv','./result/v3.0.3_submission.csv']
-
+  save_path = './45ensem_submission.csv'
+  # csv_path_list = ['./result/v2.2_submission.csv','./result/v3.0_submission.csv','./result/v3.0.1_submission.csv',
+  # './result/v3.0.2_submission.csv','./result/v3.0.3_submission.csv']
+  csv_path_list = ['./result/v5.1_submission.csv','./result/v4.1_submission.csv','./result/v4.0_submission.csv']
   vote_ensemble(csv_path_list,save_path)

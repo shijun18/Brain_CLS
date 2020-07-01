@@ -35,7 +35,7 @@ def make_label_csv(input_path,csv_path):
 
 if __name__ == "__main__":
   
-  input_path = '../dataset/pre_data/train'
-  csv_path = './shuffle_label.csv'
+  input_path = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/train'
+  csv_path = './shuffle_crop_label.csv'
 
   make_label_csv(input_path,csv_path)
