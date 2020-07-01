@@ -2,11 +2,11 @@
 __all__ = ['resnet18','se_resnet18','se_resnet10','simple_net','tiny_net','se_tiny_net']
 
 
-NET_NAME = 'tiny_net'
-VERSION = 'v5.3'
-DEVICE = '5'
+NET_NAME = 'simple_net'
+VERSION = 'v4.3'
+DEVICE = '6'
 # Must be True when pre-training and inference
-PRE_TRAINED = True 
+PRE_TRAINED = False 
 # 1,2,3,4
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
@@ -23,11 +23,15 @@ WEIGHT_PATH = {
 }
 
 
+WEIGHT_PATH_LIST = {}
+
+
+
 # Arguments when trainer initial
 INIT_TRAINER = {
     'net_name': NET_NAME,
     'lr': 1e-3,
-    'n_epoch': 100,
+    'n_epoch': 150,
     'channels': 1,
     'num_classes': 2,
     'input_shape': (128, 128),
