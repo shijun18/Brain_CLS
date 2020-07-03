@@ -1,0 +1,26 @@
+authorName: default
+experimentName: brain_cls_nni
+trialConcurrency: 24
+maxExecDuration: 10000h
+maxTrialNum: 3000
+#choice: local, remote, pai
+trainingServicePlatform: local
+searchSpacePath: search_space.json
+logDir: /staff/haoxiaoyu/workspace/brain_cls/brain_cls_nni_log
+#choice: true, false
+useAnnotation: false
+tuner:
+  #choice: TPE, Random, Anneal, Evolution, BatchTuner, MetisTuner
+  #SMAC (SMAC should be installed through nnictl)
+  builtinTunerName: TPE
+  classArgs:
+    #choice: maximize, minimize
+    optimize_mode: minimize
+trial:
+  command: python nni_run.py
+  codeDir: /staff/haoxiaoyu/workspace/brain_cls
+  gpuNum: 1
+localConfig:
+  gpuIndices: "0,1,2,3"
+  useActiveGpu: True
+  maxTrialNumPerGpu:  6

@@ -4,15 +4,15 @@ __all__ = ['resnet18', 'se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net']
 
 NET_NAME = 'tiny_net'
 VERSION = 'v1.4'
-DEVICE = '2'
+DEVICE = '6'
 
 # Must be True when pre-training and inference
-PRE_TRAINED = False
+PRE_TRAINED = True
 # 1,2,3,4
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
-FOLD_NUM = 8
-TTA_TIMES = 33
+FOLD_NUM = 9
+TTA_TIMES = 15
 
 WEIGHT_PATH = {
     'resnet18': './ckpt/{}/epoch:95-train_loss:0.04389-val_loss:0.07643.pth'.format(VERSION),
@@ -33,21 +33,22 @@ V3 = {
 }
 
 WEIGHT_PATH_LIST = {
-    './ckpt/v1.0/fold1/fold:1 epoch:97-train_loss:0.11871-val_loss:0.13737-train_acc:0.95314-val_cc:0.94000.pth',
-    './ckpt/v1.0/fold2/fold:2 epoch:81-train_loss:0.09166-val_loss:0.12492-train_acc:0.97086-val_cc:0.95200.pth',
-    './ckpt/v1.0/fold3/fold:3 epoch:71-train_loss:0.12839-val_loss:0.12439-train_acc:0.95143-val_cc:0.95600.pth',
-    './ckpt/v1.0/fold4/fold:4 epoch:85-train_loss:0.09679-val_loss:0.14785-train_acc:0.96571-val_cc:0.94800.pth',
-    './ckpt/v1.0/fold5/fold:5 epoch:86-train_loss:0.10618-val_loss:0.08745-train_acc:0.96400-val_cc:0.97200.pth',
-    './ckpt/v1.0/fold6/fold:6 epoch:96-train_loss:0.08986-val_loss:0.09555-train_acc:0.96686-val_cc:0.97200.pth',
-    './ckpt/v1.0/fold7/fold:7 epoch:95-train_loss:0.12344-val_loss:0.11264-train_acc:0.95371-val_cc:0.96800.pth',
-    './ckpt/v1.0/fold8/fold:8 epoch:99-train_loss:0.10629-val_loss:0.13315-train_acc:0.96000-val_cc:0.94000.pth',
+    './ckpt/v1.4/fold1/fold:1 epoch:171-train_loss:0.05034-val_loss:0.06367-train_acc:0.98031-val_cc:0.96847.pth',
+    './ckpt/v1.4/fold2/fold:2 epoch:172-train_loss:0.05673-val_loss:0.05404-train_acc:0.97919-val_cc:0.98649.pth',
+    './ckpt/v1.4/fold3/fold:3 epoch:177-train_loss:0.06317-val_loss:0.05245-train_acc:0.97582-val_cc:0.98649.pth',
+    './ckpt/v1.4/fold4/fold:4 epoch:186-train_loss:0.04054-val_loss:0.07168-train_acc:0.98425-val_cc:0.95946.pth',
+    './ckpt/v1.4/fold5/fold:5 epoch:185-train_loss:0.04912-val_loss:0.07480-train_acc:0.98369-val_cc:0.97748.pth',
+    './ckpt/v1.4/fold6/fold:6 epoch:145-train_loss:0.06114-val_loss:0.06208-train_acc:0.97863-val_cc:0.97297.pth',
+    './ckpt/v1.4/fold7/fold:7 epoch:163-train_loss:0.03610-val_loss:0.08639-train_acc:0.98875-val_cc:0.95495.pth',
+    './ckpt/v1.4/fold8/fold:8 epoch:165-train_loss:0.04623-val_loss:0.07621-train_acc:0.98313-val_cc:0.97297.pth',
+    './ckpt/v1.4/fold9/fold:9 epoch:191-train_loss:0.03348-val_loss:0.09733-train_acc:0.98930-val_cc:0.96875.pth',
 }
 
 # Arguments when trainer initial
 INIT_TRAINER = {
     'net_name': NET_NAME,
-    'lr': 1e-3,
-    'n_epoch': 100,
+    'lr': 1e-4,
+    'n_epoch': 300,
     'channels': 1,
     'num_classes': 2,
     'input_shape': (128, 128),
