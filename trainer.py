@@ -195,7 +195,7 @@ class Pet_Classifier(object):
                     'optimizer': optimizer.state_dict()
                 }
 
-                file_name = 'fold:{} epoch:{}-train_loss:{:.5f}-val_loss:{:.5f}-train_acc:{:.5f}-val_cc:{:.5f}.pth'.format(
+                file_name = 'fold:{} epoch:{}-train_loss:{:.5f}-val_loss:{:.5f}-train_acc:{:.5f}-val_acc:{:.5f}.pth'.format(
                     cur_fold, epoch, train_loss, val_loss, train_acc, val_acc)
                 print('Save--- '+file_name)
                 save_path = os.path.join(output_dir, file_name)
@@ -256,6 +256,9 @@ class Pet_Classifier(object):
 
         val_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize((self.mean,), (self.std,))
         ])
@@ -322,7 +325,11 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            tr.ToTensor()
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
+            tr.ToTensor(),
+            tr.Normalize((self.mean,), (self.std,))
         ])
 
         test_dataset = DataGenerator(
@@ -383,6 +390,9 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize((self.mean,), (self.std,))
         ])
