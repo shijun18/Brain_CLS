@@ -3,11 +3,12 @@ import argparse
 from trainer import Pet_Classifier
 import pandas as pd
 from data_utils.csv_reader import csv_reader_single
-from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM, WEIGHT_PATH_LIST, TTA_TIMES
+from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM, WEIGHT_PATH_LIST, TTA_TIMES, BASE_PATH
 
 import time
 import torch
 import numpy as np
+import random
 
 
 def get_cross_validation(path_list, fold_num, current_fold):
@@ -29,6 +30,29 @@ def get_cross_validation(path_list, fold_num, current_fold):
     print("Train set length ", len(train_id),
           "Val set length", len(validation_id))
     return train_id, validation_id
+
+
+def get_cross_validation_presplit(current_fold):
+    BASE_PATH = "./split_crop_output"
+
+    data = np.load(os.path.join(BASE_PATH, "fold_%d.npz" %
+                                current_fold), allow_pickle=True)
+    train_data = data['train'].tolist()
+    test_data = data['test'].tolist()
+
+    train_cases = []
+    test_cases = []
+
+    for pat_case in train_data:
+        train_cases += pat_case
+
+    for pat_case in test_data:
+        test_cases += pat_case
+
+    random.shuffle(train_cases)
+    random.shuffle(test_cases)
+
+    return train_cases, test_cases
 
 
 def get_parameter_number(net):

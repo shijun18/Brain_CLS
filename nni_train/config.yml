@@ -1,12 +1,12 @@
 authorName: default
-experimentName: brain_cls_nni
+experimentName: brain_cls_nni_crop
 trialConcurrency: 24
 maxExecDuration: 10000h
 maxTrialNum: 3000
 #choice: local, remote, pai
 trainingServicePlatform: local
 searchSpacePath: search_space.json
-logDir: /staff/haoxiaoyu/workspace/brain_cls/brain_cls_nni_log
+logDir: /staff/haoxiaoyu/workspace/brain_cls/brain_cls_nni_log_crop
 #choice: true, false
 useAnnotation: false
 tuner:
@@ -15,12 +15,12 @@ tuner:
   builtinTunerName: TPE
   classArgs:
     #choice: maximize, minimize
-    optimize_mode: minimize
+    optimize_mode: maximize
 trial:
   command: python nni_run.py
   codeDir: /staff/haoxiaoyu/workspace/brain_cls
   gpuNum: 1
 localConfig:
-  gpuIndices: "0,1,2,3"
+  gpuIndices: "0,1,2,3,4,5"
   useActiveGpu: True
-  maxTrialNumPerGpu:  6
+  maxTrialNumPerGpu: 4

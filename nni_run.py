@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from trainer import AverageMeter, accuracy
-from run import get_cross_validation, csv_reader_single
+from run import csv_reader_single, get_cross_validation_presplit, get_cross_validation
 import argparse
 import torch
 import torch.nn as nn
@@ -22,6 +22,8 @@ import nni
 from data_utils.transforms import RandomRotate
 from data_utils.data_loader import DataGenerator
 
+import random
+
 
 _logger = logging.getLogger("brainCLS_pytorch_automl")
 
@@ -37,7 +39,8 @@ MEAN = 0.105393
 STD = 0.203002
 channels = 1
 num_classes = 2
-FOLD_NUM = 9
+FOLD_NUM = 5
+# BASE_PATH = "./split_output"
 
 input_shape = (128, 128)
 
@@ -151,7 +154,7 @@ def prepare(args, train_path, val_path, label_dict):
     train_transformer = transforms.Compose([
         tr.Resize(input_shape),
         RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
-        tr.RandomResizedCrop(input_shape, scale=(0.9, 1.1)),
+        # tr.RandomResizedCrop(input_shape, scale=(0.9, 1.1)),
         tr.RandomHorizontalFlip(p=0.5),
         tr.RandomVerticalFlip(p=0.5),
         tr.ToTensor(),
@@ -193,22 +196,25 @@ def prepare(args, train_path, val_path, label_dict):
     if args['optimizer'] == 'SGD':
         optimizer = optim.SGD(
             net.parameters(), lr=args['lr'], momentum=args['momentum'], weight_decay=args['weight_decay'])
-    if args['optimizer'] == 'RMSprop':
+    elif args['optimizer'] == 'RMSprop':
         optimizer = optim.RMSprop(
             net.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
-    if args['optimizer'] == 'Adam':
+    elif args['optimizer'] == 'Adam':
         optimizer = optim.Adam(
             net.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
 
-    elif args['lr_scheduler'] == 'MultiStepLR':
+    if args['lr_scheduler'] == 'MultiStepLR':
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
-            optimizer, milestones=args['milestones'], gamma=args['gamma'])
+            optimizer, milestones=[args['milestones_1'][0]], gamma=args['gamma'])
+    elif args['lr_scheduler'] == 'StepLR':
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=args['step_size'], gamma=args['gamma'])
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=200)
+    parser.add_argument("--epochs", type=int, default=250)
     parser.add_argument("--cur_fold", type=int, default=0)
 
     args, _ = parser.parse_known_args()
@@ -217,19 +223,21 @@ if __name__ == '__main__':
         RCV_CONFIG = nni.get_next_parameter()
         _logger.debug(RCV_CONFIG)
 
-        csv_path = './converter/shuffle_label.csv'
+        csv_path = './converter/shuffle_crop_label.csv'
         label_dict = csv_reader_single(
             csv_path, key_col='id', value_col='label')
         path_list = list(label_dict.keys())
 
-        fold_losses = []
+        fold_acc = []
 
-        for cur_fold in range(1, FOLD_NUM+1):
-            train_path, val_path = get_cross_validation(
-                path_list, FOLD_NUM, cur_fold)
+        for cur_fold in range(FOLD_NUM):
+            train_path, val_path = get_cross_validation_presplit(cur_fold)
+        # for cur_fold in range(1, FOLD_NUM+1):
+        #     train_path, val_path = get_cross_validation(
+        #         path_list, FOLD_NUM, cur_fold)
             prepare(RCV_CONFIG, train_path, val_path, label_dict)
 
-            fold_best_val_loss = 100.
+            fold_best_val_acc = 0.
             for epoch in range(start_epoch, start_epoch+args.epochs):
                 epoch_train_loss, epoch_train_acc = train_on_epoch(epoch)
                 epoch_val_loss, epoch_val_acc = val_on_epoch(epoch)
@@ -240,12 +248,14 @@ if __name__ == '__main__':
                 print('Fold %d | Epoch %d | Val Loss %.5f | Acc %.5f'
                       % (cur_fold, epoch, epoch_val_loss, epoch_val_acc))
 
-                fold_best_val_loss = min(fold_best_val_loss, epoch_val_loss)
-                nni.report_intermediate_result(epoch_val_loss)
+                if epoch > args.epochs/2:
+                    fold_best_val_acc = max(fold_best_val_acc, epoch_val_acc)
+                nni.report_intermediate_result(epoch_val_acc)
 
-            fold_losses.append(fold_best_val_loss)
-            break
-        nni.report_final_result(np.mean(fold_losses))
+            fold_acc.append(fold_best_val_acc)
+            # break
+        print("Average ACC ", np.mean(fold_acc))
+        nni.report_final_result(np.mean(fold_acc))
     except Exception as exception:
         _logger.exception(exception)
         raise
