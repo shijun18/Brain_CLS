@@ -61,6 +61,7 @@ class Pet_Classifier(object):
         self.start_epoch = 0
         self.global_step = 0
         self.loss_threshold = 1.0
+        self.acc_threshold = 0.
         # save the middle output
         self.feature_in = []
         self.feature_out = []
@@ -80,7 +81,7 @@ class Pet_Classifier(object):
                 self.weight_path.split(':')[-1])[0])
 
     def trainer(self, train_path, val_path, label_dict, cur_fold, output_dir=None, log_dir=None, optimizer='Adam',
-                loss_fun='Cross_Entropy', class_weight=None, lr_scheduler=None):
+                loss_fun='Cross_Entropy', class_weight=None, lr_scheduler_name=""):
 
         torch.manual_seed(0)
         print('Device:{}'.format(self.device))
@@ -143,8 +144,8 @@ class Pet_Classifier(object):
             checkpoint = torch.load(self.weight_path)
             optimizer.load_state_dict(checkpoint['optimizer'])
 
-        if lr_scheduler is not None:
-            lr_scheduler = self._get_lr_scheduler(lr_scheduler, optimizer)
+        if lr_scheduler_name != "":
+            lr_scheduler = self._get_lr_scheduler(lr_scheduler_name, optimizer)
 
         # acc_threshold = 0.5
         min_loss = 10.
@@ -159,8 +160,10 @@ class Pet_Classifier(object):
             val_loss, val_acc = self._val_on_epoch(
                 epoch, net, loss, val_path, label_dict)
 
-            if lr_scheduler is not None:
+            if lr_scheduler_name == "ReduceLROnPlateau":
                 lr_scheduler.step(val_loss)
+            else:
+                lr_scheduler.step()
 
             print('Train epoch:{},train_loss:{:.5f},train_acc:{:.5f}'
                   .format(epoch, train_loss, train_acc))
@@ -178,8 +181,9 @@ class Pet_Classifier(object):
                 'data/lr', optimizer.param_groups[0]['lr'], epoch
             )
 
-            if val_loss < self.loss_threshold:
-                self.loss_threshold = val_loss
+            # if epoch > self.n_epoch/2 and val_loss < self.loss_threshold:
+            if epoch > self.n_epoch/2 and val_acc > self.acc_threshold:
+                self.acc_threshold = val_acc
 
                 min_loss = min(min_loss, val_loss)
                 max_acc = max(max_acc, val_acc)

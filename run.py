@@ -67,7 +67,7 @@ if __name__ == "__main__":
                         help='choose the mode', type=str)
     parser.add_argument('-s', '--save', default='no', choices=['no', 'n', 'yes', 'y'],
                         help='save the forward middle features or not', type=str)
-    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/pre_data/test/AD&CN',
+    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/test/AD&CN',
                         help='the directory path of input image', type=str)
     args = parser.parse_args()
 
@@ -198,8 +198,13 @@ if __name__ == "__main__":
     # Inference with cross validation
     ###############################################
     elif args.mode == 'inf_cross_val':
-        test_path = [os.path.join(args.path, case)
-                     for case in os.listdir(args.path)]
+        if USE_CROP:
+            path = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/test/AD&CN'
+        else:
+            path = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_data/test/AD&CN'
+
+        test_path = [os.path.join(path, case)for case in os.listdir(args.path)]
+
         save_path_vote = './analysis/result/{}_submission_vote.csv'.format(
             VERSION)
         save_path = './analysis/result/{}_submission.csv'.format(VERSION)
