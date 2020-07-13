@@ -216,6 +216,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=250)
     parser.add_argument("--cur_fold", type=int, default=0)
+    BASE_PATH = "./split_crop_output"
 
     args, _ = parser.parse_known_args()
 
@@ -231,7 +232,8 @@ if __name__ == '__main__':
         fold_acc = []
 
         for cur_fold in range(FOLD_NUM):
-            train_path, val_path = get_cross_validation_presplit(cur_fold)
+            train_path, val_path = get_cross_validation_presplit(
+                cur_fold, BASE_PATH)
         # for cur_fold in range(1, FOLD_NUM+1):
         #     train_path, val_path = get_cross_validation(
         #         path_list, FOLD_NUM, cur_fold)

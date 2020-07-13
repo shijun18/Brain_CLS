@@ -42,7 +42,7 @@ class Pet_Classifier(object):
 
     def __init__(self, net_name=None, gamma=0.1, lr=1e-3, n_epoch=1, channels=1, num_classes=3, input_shape=None, crop=48,
                  batch_size=6, num_workers=0, device=None, pre_trained=False, weight_path=None, weight_decay=0.,
-                 momentum=0.95, mean=0.105393, std=0.203002, milestones=None):
+                 momentum=0.95, mean=0.105393, std=0.203002, milestones=None, step_size=10):
         super(Pet_Classifier, self).__init__()
 
         self.net_name = net_name
@@ -70,6 +70,7 @@ class Pet_Classifier(object):
         self.std = std
         self.gamma = gamma
         self.milestones = milestones
+        self.step_size = step_size
 
         os.environ['CUDA_VISIBLE_DEVICES'] = self.device
 
@@ -531,6 +532,10 @@ class Pet_Classifier(object):
         elif lr_scheduler == 'MultiStepLR':
             lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 optimizer, self.milestones, gamma=self.gamma)
+        elif lr_scheduler == 'StepLR':
+            lr_scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer, step_size=self.step_size, gamma=self.gamma)
+
         return lr_scheduler
 
     def _get_pre_trained(self, weight_path):

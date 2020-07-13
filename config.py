@@ -3,8 +3,8 @@ __all__ = ['resnet18', 'se_resnet18', 'se_resnet10',
            'simple_net', 'tiny_net', 'se_tiny_net']
 
 NET_NAME = 'tiny_net'
-VERSION = 'v2.0'
-DEVICE = '0'
+VERSION = 'v2.1'
+DEVICE = '1'
 
 # Must be True when pre-training and inference
 PRE_TRAINED = False
@@ -13,7 +13,9 @@ CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
 FOLD_NUM = 5
 TTA_TIMES = 15
-BASE_PATH = "./split_output"
+BASE_PATH = "./split_crop_output"
+PRE_SPLIT = True
+USE_CROP = True
 
 WEIGHT_PATH = {
     'resnet18': './ckpt/{}/epoch:95-train_loss:0.04389-val_loss:0.07643.pth'.format(VERSION),
@@ -25,16 +27,13 @@ WEIGHT_PATH = {
 }
 
 
-WEIGHT_PATH_LIST = {}
-
-
 WEIGHT_PATH_LIST = {
 }
 
 # Arguments when trainer initial
 INIT_TRAINER = {
     'net_name': NET_NAME,
-    'lr': 1e-2,
+    'lr': 0.008,
     'n_epoch': 200,
     'channels': 1,
     'num_classes': 2,
@@ -45,12 +44,13 @@ INIT_TRAINER = {
     'device': DEVICE,
     'pre_trained': PRE_TRAINED,
     'weight_path': WEIGHT_PATH[NET_NAME],
-    'weight_decay': 1e-5,
+    'weight_decay': 0,
     'momentum': 0.9,
     'mean': 0.105393,
     'std': 0.203002,
-    'gamma': 0.1,
-    'milestones': [110]
+    'gamma': 0.95,
+    'milestones': [110],
+    'step_size': 10
 }
 
 # Arguments when perform the trainer
@@ -60,5 +60,5 @@ SETUP_TRAINER = {
     'optimizer': 'SGD',
     'loss_fun': 'Cross_Entropy',
     'class_weight': None,
-    'lr_scheduler': None
+    'lr_scheduler': 'StepLR'
 }

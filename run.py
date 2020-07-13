@@ -3,7 +3,7 @@ import argparse
 from trainer import Pet_Classifier
 import pandas as pd
 from data_utils.csv_reader import csv_reader_single
-from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM, WEIGHT_PATH_LIST, TTA_TIMES, BASE_PATH
+from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM, WEIGHT_PATH_LIST, USE_CROP, TTA_TIMES, BASE_PATH, PRE_SPLIT
 
 import time
 import torch
@@ -32,10 +32,9 @@ def get_cross_validation(path_list, fold_num, current_fold):
     return train_id, validation_id
 
 
-def get_cross_validation_presplit(current_fold):
-    BASE_PATH = "./split_crop_output"
+def get_cross_validation_presplit(current_fold, base_path):
 
-    data = np.load(os.path.join(BASE_PATH, "fold_%d.npz" %
+    data = np.load(os.path.join(base_path, "fold_%d.npz" %
                                 current_fold), allow_pickle=True)
     train_data = data['train'].tolist()
     test_data = data['test'].tolist()
@@ -72,8 +71,14 @@ if __name__ == "__main__":
                         help='the directory path of input image', type=str)
     args = parser.parse_args()
 
+    print(INIT_TRAINER)
+
     # Set data path & classifier
-    csv_path = './converter/shuffle_crop_label.csv'
+    if USE_CROP:
+        csv_path = './converter/shuffle_crop_label.csv'
+    else:
+        csv_path = './converter/shuffle_label.csv'
+
     label_dict = csv_reader_single(csv_path, key_col='id', value_col='label')
 
     if args.mode != 'crs_val_train' and args.mode != 'inf_cross_val':
@@ -87,15 +92,20 @@ if __name__ == "__main__":
         loss_list = []
         acc_list = []
 
-        for current_fold in range(1, FOLD_NUM+1):
+        for current_fold in range(FOLD_NUM):
             print("=== Training Fold ", current_fold, " ===")
             classifier = Pet_Classifier(**INIT_TRAINER)
 
             if current_fold == 0:
                 print(get_parameter_number(classifier.net))
 
-            train_path, val_path = get_cross_validation(
-                path_list, FOLD_NUM, current_fold)
+            if PRE_SPLIT:
+                train_path, val_path = get_cross_validation_presplit(
+                    current_fold, BASE_PATH)
+            else:
+                train_path, val_path = get_cross_validation(
+                    path_list, FOLD_NUM, current_fold + 1)
+
             SETUP_TRAINER['train_path'] = train_path
             SETUP_TRAINER['val_path'] = val_path
             SETUP_TRAINER['label_dict'] = label_dict
