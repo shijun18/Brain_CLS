@@ -26,14 +26,15 @@ WEIGHT_PATH = {
     'se_tiny_net': './ckpt/{}/'.format(VERSION),
 }
 
-
 WEIGHT_PATH_LIST = {
+
 }
+
 
 # Arguments when trainer initial
 INIT_TRAINER = {
     'net_name': NET_NAME,
-    'lr': 0.008,
+    'lr': 0.01,
     'n_epoch': 250,
     'channels': 1,
     'num_classes': 2,
@@ -60,5 +61,5 @@ SETUP_TRAINER = {
     'optimizer': 'SGD',
     'loss_fun': 'Cross_Entropy',
     'class_weight': None,
-    'lr_scheduler': 'StepLR'
+    'lr_scheduler_name': 'StepLR'
 }
