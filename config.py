@@ -34,7 +34,7 @@ WEIGHT_PATH_LIST = {
 INIT_TRAINER = {
     'net_name': NET_NAME,
     'lr': 0.008,
-    'n_epoch': 200,
+    'n_epoch': 250,
     'channels': 1,
     'num_classes': 2,
     'input_shape': (128, 128),
