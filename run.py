@@ -9,6 +9,7 @@ import time
 import torch
 import numpy as np
 
+from analysis.pre_process import get_class_split_multiply,get_cross_val_by_class
 
 def get_cross_validation(path_list, fold_num, current_fold):
 
@@ -44,11 +45,12 @@ if __name__ == "__main__":
                         help='choose the mode', type=str)
     parser.add_argument('-s', '--save', default='no', choices=['no', 'n', 'yes', 'y'],
                         help='save the forward middle features or not', type=str)
-    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/pre_data/test/AD&CN',
+    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/test/AD&CN',
                         help='the directory path of input image', type=str)
     args = parser.parse_args()
 
     # Set data path & classifier
+    # csv_path = './converter/pre_0.80_shuffle_crop_label.csv'
     csv_path = './converter/shuffle_crop_label.csv'
     label_dict = csv_reader_single(csv_path, key_col='id', value_col='label')
 
@@ -59,7 +61,9 @@ if __name__ == "__main__":
     # Training with cross validation
     ###############################################
     if args.mode == 'train_cross_val':
-        path_list = list(label_dict.keys())
+        # path_list = list(label_dict.keys())
+        path_list = get_class_split_multiply()
+
         loss_list = []
         acc_list = []
 
@@ -70,7 +74,9 @@ if __name__ == "__main__":
             if current_fold == 0:
                 print(get_parameter_number(classifier.net))
 
-            train_path, val_path = get_cross_validation(
+            # train_path, val_path = get_cross_validation(
+            #     path_list, FOLD_NUM, current_fold)
+            train_path, val_path = get_cross_val_by_class(
                 path_list, FOLD_NUM, current_fold)
             SETUP_TRAINER['train_path'] = train_path
             SETUP_TRAINER['val_path'] = val_path
@@ -155,7 +161,7 @@ if __name__ == "__main__":
         info = {}
         info['uuid'] = [os.path.splitext(os.path.basename(case))[
             0] for case in test_path]
-        info['label'] = result['pred']
+        info['label'] = ['AD' if case == 0 else 'CN' for case in result['pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path, index=False)
@@ -168,7 +174,7 @@ if __name__ == "__main__":
                      for case in os.listdir(args.path)]
         save_path_vote = './analysis/result/{}_submission_vote.csv'.format(
             VERSION)
-        save_path = './analysis/result/{}_submission.csv'.format(VERSION)
+        save_path = './analysis/result/{}_submission_ave.csv'.format(VERSION)
 
         result = {
             'pred': [],
@@ -181,7 +187,7 @@ if __name__ == "__main__":
 
         start_time = time.time()
         for i, weight_path in enumerate(WEIGHT_PATH_LIST):
-            print("Inference %d fold..." % i)
+            print("Inference %d fold..." % (i+1))
             INIT_TRAINER['weight_path'] = weight_path
             classifier = Pet_Classifier(**INIT_TRAINER)
 
@@ -195,14 +201,14 @@ if __name__ == "__main__":
 
         result['pred'].extend(np.argmax(avg_output, 1).tolist())
         result['vote_pred'].extend(
-            (np.sum(all_vote_output, 0) > FOLD_NUM//2).astype(int).tolist())
+            (np.sum(all_vote_output, 0) > len(WEIGHT_PATH_LIST)//2).astype(int).tolist())
 
         print('run time:%.4f' % (time.time()-start_time))
 
         info = {}
         info['uuid'] = [os.path.splitext(os.path.basename(case))[
             0] for case in test_path]
-        info['label'] = result['pred']
+        info['label'] = ['AD' if case == 0 else 'CN' for case in result['pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path, index=False)
@@ -210,7 +216,7 @@ if __name__ == "__main__":
         info = {}
         info['uuid'] = [os.path.splitext(os.path.basename(case))[
             0] for case in test_path]
-        info['label'] = result['vote_pred']
+        info['label'] = ['AD' if case == 0 else 'CN' for case in result['vote_pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path_vote, index=False)

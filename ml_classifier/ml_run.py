@@ -28,19 +28,19 @@ SETUP_TRAINER = {
 
 if __name__ == "__main__":
 
-  csv_path = '../converter/shuffle_crop_label_features.csv'
-  df = pd.read_csv(csv_path).iloc[:,1:]
-  # del df['Progression (Days)']
+  csv_path = './shuffle_crop_label_features.csv'
+  df = pd.read_csv(csv_path)
+  del df['id']
   # print(df)
-  # clf_name = 'xgboost' 
-  # classifier = ML_Classifier(clf_name=clf_name,params=params_dict[clf_name])
-  # model = classifier.trainer(df=df,**SETUP_TRAINER)
-  for clf_name in _AVAIL_CLF[:-2]:
-    import copy
-    tmp_df = copy.copy(df)
-    print('********** %s **********'%clf_name)
-    classifier = ML_Classifier(clf_name=clf_name,params=params_dict[clf_name])
-    model = classifier.trainer(df=tmp_df,**SETUP_TRAINER)
+  clf_name = 'xgboost' 
+  classifier = ML_Classifier(clf_name=clf_name,params=params_dict[clf_name])
+  model = classifier.trainer(df=df,**SETUP_TRAINER)
+  # for clf_name in _AVAIL_CLF[2:-2]:
+  #   import copy
+  #   tmp_df = copy.copy(df)
+  #   print('********** %s **********'%clf_name)
+  #   classifier = ML_Classifier(clf_name=clf_name,params=params_dict[clf_name])
+  #   model = classifier.trainer(df=tmp_df,**SETUP_TRAINER)
   
   # save model
   # pkl_filename = "./save_model/{}.pkl".format(clf_name.replace(' ','_'))

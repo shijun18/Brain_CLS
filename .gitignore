@@ -6,3 +6,4 @@ ckpt/
 .vscode/
 __pycache__/
 result/
+*.csv

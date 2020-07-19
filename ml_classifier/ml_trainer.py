@@ -31,15 +31,15 @@ params_dict = {
     'max_depth':range(3,15),
   },
   'random forest':{
-    'n_estimators':range(10,100,5),
+    'n_estimators':range(10,150,5),
     'criterion':['gini','entropy']
   },
   'extra trees':{
-    'n_estimators':range(10,100,5),
+    'n_estimators':range(10,150,5),
     'criterion':['gini','entropy']
   },
   'bagging':{
-    'n_estimators':range(10,100,5),
+    'n_estimators':range(10,150,5),
   },
   'mlp':{
     'alpha':[0.001,0.01,0.1,1,10],
@@ -49,7 +49,7 @@ params_dict = {
     'learning_rate':['constant','invscaling']
   },
   'xgboost':{
-    'n_estimators':range(10,50,5),
+    'n_estimators':range(10,150,5),
     'max_depth':range(2,15,1),
     'learning_rate':np.linspace(0.01,2,20),
     'subsample':np.linspace(0.7,0.9,20),
@@ -95,14 +95,14 @@ class ML_Classifier(object):
                         param_grid=params,
                         cv=kfold,
                         scoring=metric,
-                        refit='Accuracy',
+                        refit='F1',
                         return_train_score=True)
     grid = grid.fit(x_train,y_train)
 
     best_score = grid.best_score_
     best_model = grid.best_estimator_
     test_score = best_model.score(x_test,y_test)
-    print("Accuracy Evaluation:")
+    print("F1 Evaluation:")
     print("Best score:{}".format(best_score))
     print("Test score:{}".format(test_score))
     
@@ -133,25 +133,25 @@ class ML_Classifier(object):
     
   def _get_clf(self):
     if self.clf_name == 'lasso':
-      classifer = LogisticRegression(penalty='l2',random_state=0)
+      classifier = LogisticRegression(penalty='l2',random_state=0)
     elif self.clf_name == 'knn':
-      classifer = KNeighborsClassifier()
+      classifier = KNeighborsClassifier()
     elif self.clf_name == 'svm':
-      classifer = SVC(kernel='rbf',random_state=0)
+      classifier = SVC(kernel='rbf',random_state=0)
     elif self.clf_name == 'decision tree':
-      classifer = DecisionTreeClassifier(random_state=0)
+      classifier = DecisionTreeClassifier(random_state=0)
     elif self.clf_name == 'random forest':
-      classifer = RandomForestClassifier(random_state=0,bootstrap=True)
+      classifier = RandomForestClassifier(random_state=0,bootstrap=True)
     elif self.clf_name == 'extra trees':
-      classifer = ExtraTreesClassifier(random_state=0,bootstrap=True)
+      classifier = ExtraTreesClassifier(random_state=0,bootstrap=True)
     elif self.clf_name == 'bagging':
-      classifer = BaggingClassifier(random_state=0)
+      classifier = BaggingClassifier(random_state=0)
     elif self.clf_name == 'mlp':
-      classifer = MLPClassifier(max_iter=2000,warm_start=True,random_state=0)
+      classifier = MLPClassifier(max_iter=2000,warm_start=True,random_state=0)
     elif self.clf_name == 'xgboost':
-      classifer = XGBClassifier()
+      classifier = XGBClassifier()
 
-    return classifer  
+    return classifier  
 
 
   def extract_df(self,df,target_key,random_state):

@@ -33,6 +33,35 @@ def get_contour(image):
 
 
 
+
+def get_coord(img):
+    left=right=top=down = 0
+    maxindex = img.shape[0]
+    for i in range(img.shape[0]):
+        if np.sum(img[i,:]) != 0 and top == 0:
+            top = i
+        if np.sum(img[:,i]) != 0 and left == 0:
+            left = i   
+        if np.sum(img[maxindex-i-1,:]) != 0 and down == 0:
+            down = maxindex-i-1
+        if np.sum(img[:,maxindex-i-1]) != 0 and right == 0:
+            right = maxindex-i-1    
+    return left,right,top,down    
+
+
+
+
+def crop_by_edge_single(input_path,save_path):
+  img = Image.open(input_path).convert('L')
+  edge = cv2.Canny(np.array(img),30,100)
+  left,right,top,down = get_coord(edge)
+  
+  new_img = img.crop((left-5,top-5,right+5,down+5))
+  new_img.save(save_path)
+
+
+
+
 def crop_by_contour_single(input_path,save_path):
   img = Image.open(input_path).convert('L')
   contour = get_contour(img)
@@ -42,7 +71,7 @@ def crop_by_contour_single(input_path,save_path):
 
 
 
-def crop_by_contour(input_path,save_path):
+def extract_roi(input_path,save_path):
   if os.path.isdir(input_path):
     entry_iterator = os.scandir(input_path)
     for item in entry_iterator:
@@ -50,11 +79,11 @@ def crop_by_contour(input_path,save_path):
         temp_path = os.path.join(save_path,item.name)
         if not os.path.exists(temp_path):
           os.makedirs(temp_path)
-        crop_by_contour(item.path,temp_path)  
+        extract_roi(item.path,temp_path)  
 
       elif item.is_file() and os.path.splitext(item.name)[1] == '.png':
         temp_path = os.path.join(save_path,item.name)
-        crop_by_contour_single(item.path,temp_path)
+        crop_by_edge_single(item.path,temp_path)
         print("%s done!" % item.path)
   
   elif os.path.isfile(input_path) and os.path.splitext(os.path.basename(input_path))[1] == '.png':
@@ -62,12 +91,14 @@ def crop_by_contour(input_path,save_path):
       os.makedirs(save_path)
     name = os.path.basename(input_path)
     temp_path = os.path.join(save_path,name)
-    crop_by_contour_single(input_path,temp_path)
+    crop_by_edge_single(input_path,temp_path)
     print("%s done!" % input_path)
+
+
 
 
 if __name__ == "__main__":
   
   input_path = '../dataset/pre_data/'
-  save_path = '../dataset/pre_crop_data/'
-  crop_by_contour(input_path,save_path)
+  save_path = '../dataset/pre_crop_edge/'
+  extract_roi(input_path,save_path)

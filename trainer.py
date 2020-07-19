@@ -42,7 +42,7 @@ class Pet_Classifier(object):
 
     def __init__(self, net_name=None, gamma=0.1, lr=1e-3, n_epoch=1, channels=1, num_classes=3, input_shape=None, crop=48,
                  batch_size=6, num_workers=0, device=None, pre_trained=False, weight_path=None, weight_decay=0.,
-                 momentum=0.95, mean=0.105393, std=0.203002, milestones=None):
+                 momentum=0.95, mean=(0.105393,), std=(0.203002,), milestones=None):
         super(Pet_Classifier, self).__init__()
 
         self.net_name = net_name
@@ -90,7 +90,7 @@ class Pet_Classifier(object):
         output_dir = os.path.join(output_dir, "fold"+str(cur_fold))
         log_dir = os.path.join(log_dir, "fold"+str(cur_fold))
 
-        make_dir(base_dir)
+        remove_dir(output_dir)
         make_dir(output_dir)
 
         remove_dir(log_dir)
@@ -116,11 +116,11 @@ class Pet_Classifier(object):
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
-            tr.Normalize((self.mean,), (self.std,))
+            tr.Normalize(self.mean, self.std)
         ])
 
         train_dataset = DataGenerator(
-            train_path, label_dict, transform=train_transformer)
+            train_path, label_dict, channels=self.channels, transform=train_transformer)
 
         train_loader = DataLoader(
             train_dataset,
@@ -145,7 +145,7 @@ class Pet_Classifier(object):
             lr_scheduler = self._get_lr_scheduler(lr_scheduler, optimizer)
 
         # acc_threshold = 0.5
-        min_loss = 10.
+        min_loss = 1.
         max_acc = 0.
 
         for epoch in range(self.start_epoch, self.n_epoch):
@@ -259,11 +259,11 @@ class Pet_Classifier(object):
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
-            tr.Normalize((self.mean,), (self.std,))
+            tr.Normalize(self.mean, self.std)
         ])
 
         val_dataset = DataGenerator(
-            val_path, label_dict, transform=val_transformer)
+            val_path, label_dict, channels=self.channels, transform=val_transformer)
 
         val_loader = DataLoader(
             val_dataset,
@@ -328,11 +328,11 @@ class Pet_Classifier(object):
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
-            tr.Normalize((self.mean,), (self.std,))
+            tr.Normalize(self.mean, self.std)
         ])
 
         test_dataset = DataGenerator(
-            test_path, label_dict, transform=test_transformer)
+            test_path, label_dict, channels=self.channels, transform=test_transformer)
 
         test_loader = DataLoader(
             test_dataset,
@@ -393,10 +393,10 @@ class Pet_Classifier(object):
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
-            tr.Normalize((self.mean,), (self.std,))
+            tr.Normalize(self.mean, self.std)
         ])
 
-        test_dataset = DataGenerator(test_path, transform=test_transformer)
+        test_dataset = DataGenerator(test_path, channels=self.channels, transform=test_transformer)
 
         test_loader = DataLoader(
             test_dataset,
@@ -442,10 +442,10 @@ class Pet_Classifier(object):
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
-            tr.Normalize((self.mean,), (self.std,))
+            tr.Normalize(self.mean, self.std)
         ])
 
-        test_dataset = DataGenerator(test_path, transform=None)
+        test_dataset = DataGenerator(test_path, channels=self.channels, transform=None)
 
         prob_output = []
         vote_output = []
@@ -458,7 +458,10 @@ class Pet_Classifier(object):
                 binary_output = []
 
                 for _ in range(tta_times):
-                    img = Image.fromarray(np.copy(data)).convert('L')
+                    if self.channels == 1:
+                        img = Image.fromarray(np.copy(data)).convert('L')
+                    elif self.channels == 3:
+                        img = Image.fromarray(np.copy(data)).convert('RGB')
                     img_tensor = test_transformer(img)
                     img_tensor = torch.unsqueeze(img_tensor, 0)
 
@@ -482,6 +485,14 @@ class Pet_Classifier(object):
         if net_name == 'resnet18':
             from model.resnet import resnet18
             net = resnet18(input_channels=self.channels,
+                           num_classes=self.num_classes)
+        elif net_name == 'resnet34':
+            from model.resnet import resnet34
+            net = resnet34(input_channels=self.channels,
+                           num_classes=self.num_classes)
+        elif net_name == 'resnet50':
+            from model.resnet import resnet50
+            net = resnet50(input_channels=self.channels,
                            num_classes=self.num_classes)
         elif net_name == 'se_resnet18':
             from model.se_resnet import se_resnet18
