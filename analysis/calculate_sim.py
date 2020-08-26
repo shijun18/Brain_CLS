@@ -67,7 +67,7 @@ def calculate_hist_sim(img_1,img_2):
 
 
 def similarity_cal_hist(input_path,save_path,resize_flag=False):
-    path_list = glob.glob(os.path.join(input_path,"*.png"))
+    path_list = glob.glob(os.path.join(input_path,"*.*g"))
     path_list.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
     path_list = path_list[:22]
     
@@ -129,7 +129,7 @@ def calculate_sim_cv(img_1,img_2,mode='surf'):
 
 
 def similarity_cal_cv(input_path,save_path,resize_flag=False,mode='surf'):
-    path_list = glob.glob(os.path.join(input_path,"*.png"))
+    path_list = glob.glob(os.path.join(input_path,"*.*g"))
     path_list.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
     # path_list = path_list[:22]
     
@@ -181,7 +181,7 @@ def calculate_ssim(img_1,img_2,rotation=None):
    
 
 def similarity_cal(input_path,save_path,resize_flag=False,rotate_flag=False):
-    path_list = glob.glob(os.path.join(input_path,"*.png"))
+    path_list = glob.glob(os.path.join(input_path,"*.*g"))
     path_list.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
 
     csv_data = {}
@@ -240,49 +240,64 @@ def meger_csv(path_s,path_d,save_path):
 
 
 if __name__ == "__main__":
-    # data_path  = '../dataset/pre_data/train/AD'
+    
+    # data_path  = '../dataset/post_data/train/AD'
     # save_csv = './sim_csv/AD_sim.csv'
     # similarity_cal(data_path,save_csv,resize_flag=False)
     # print('AD done!')
-    # data_path  = '../dataset/pre_data/train/CN'
+    # data_path  = '../dataset/post_data/train/CN'
     # save_csv = './sim_csv/CN_sim.csv'
     # similarity_cal(data_path,save_csv,resize_flag=False)
     # print('CN done!')
+    # data_path  = '../dataset/post_data/train/MCI'
+    # save_csv = './sim_csv/MCI_sim.csv'
+    # similarity_cal(data_path,save_csv,resize_flag=False)
+    # print('MCI done!')
     
-    data_path  = '../dataset/pre_crop_data/train/AD'
-    save_csv = './sim_csv/AD_crop_sim_cv.csv'
-    similarity_cal_cv(data_path,save_csv,resize_flag=True)
-    print('AD done!')
-    data_path  = '../dataset/pre_crop_data/train/CN'
-    save_csv = './sim_csv/CN_crop_sim_cv.csv'
-    similarity_cal_cv(data_path,save_csv,resize_flag=True)
-    print('CN done!')
+    # data_path  = '../dataset/post_crop_data/train/AD'
+    # save_csv = './sim_csv/AD_crop_sim.csv'
+    # similarity_cal(data_path,save_csv,resize_flag=True)
+    # print('AD done!')
+    # data_path  = '../dataset/post_crop_data/train/CN'
+    # save_csv = './sim_csv/CN_crop_sim.csv'
+    # similarity_cal(data_path,save_csv,resize_flag=True)
+    # print('CN done!')
+    # data_path  = '../dataset/post_crop_data/train/MCI'
+    # save_csv = './sim_csv/MCI_crop_sim.csv'
+    # similarity_cal(data_path,save_csv,resize_flag=True)
+    # print('MCI done!')
 
-    path_sim = './sim_csv/AD_sim.csv'
-    path_crop_sim = './sim_csv/AD_crop_sim_cv.csv'
-    save_path = './sim_csv/AD_merge_cv.csv'
-    meger_csv(path_sim,path_crop_sim,save_path)
-    print('AD done!')
+    # path_sim = './sim_csv/AD_sim.csv'
+    # path_crop_sim = './sim_csv/AD_crop_sim.csv'
+    # save_path = './sim_csv/AD_merge.csv'
+    # meger_csv(path_sim,path_crop_sim,save_path)
+    # print('AD done!')
 
-    path_sim = './sim_csv/CN_sim.csv'
-    path_crop_sim = './sim_csv/CN_crop_sim_cv.csv'
-    save_path = './sim_csv/CN_merge_cv.csv'
+    # path_sim = './sim_csv/CN_sim.csv'
+    # path_crop_sim = './sim_csv/CN_crop_sim.csv'
+    # save_path = './sim_csv/CN_merge.csv'
+    # meger_csv(path_sim,path_crop_sim,save_path)
+    # print('CN done!')
+
+    path_sim = './sim_csv/MCI_sim.csv'
+    path_crop_sim = './sim_csv/MCI_crop_sim.csv'
+    save_path = './sim_csv/MCI_merge.csv'
     meger_csv(path_sim,path_crop_sim,save_path)
-    print('CN done!')
+    print('MCI done!')
     
     
-    # data_path  = '../dataset/pre_data/test/AD&CN'
+    # data_path  = '../dataset/post_data/test/AD&CN&MCI'
     # save_csv = './sim_csv/test_sim.csv'
     # similarity_cal(data_path,save_csv)
     # print('sim done!')
 
-    data_path  = '../dataset/pre_crop_data/test/AD&CN'
-    save_csv = './sim_csv/test_crop_sim_cv.csv'
-    similarity_cal_cv(data_path,save_csv,resize_flag=True)
-    print('crop sim done!')
+    # data_path  = '../dataset/post_crop_data/test/AD&CN&MCI'
+    # save_csv = './sim_csv/test_crop_sim.csv'
+    # similarity_cal(data_path,save_csv,resize_flag=True,rotate_flag=True)
+    # print('crop sim done!')
 
-    path_sim = './sim_csv/test_sim.csv'
-    path_crop_sim = './sim_csv/test_crop_sim_cv.csv'
-    save_path = './sim_csv/test_merge_cv.csv'
-    meger_csv(path_sim,path_crop_sim,save_path)
-    print('test done!')
+    # path_sim = './sim_csv/test_sim.csv'
+    # path_crop_sim = './sim_csv/test_crop_sim.csv'
+    # save_path = './sim_csv/test_merge.csv'
+    # meger_csv(path_sim,path_crop_sim,save_path)
+    # print('test done!')

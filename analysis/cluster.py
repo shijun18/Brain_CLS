@@ -47,8 +47,8 @@ def union_find(data,threshold=0.7):
             # print(fa[i] + 1, end = ", ")
             result.append(fa[i] + 1)
 
-    print("\ntypes=",end='')
-    print(len(rec))
+    # print("\ntypes=",end='')
+    # print(len(rec))
     return result
 
 

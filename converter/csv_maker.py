@@ -19,7 +19,7 @@ def make_label_csv(input_path,csv_path):
   for subdir in os.scandir(input_path):
     # print(subdir.name)
     index = RULE[subdir.name]
-    path_list = glob.glob(os.path.join(subdir.path,"*.png"))
+    path_list = glob.glob(os.path.join(subdir.path,"*.*g"))
     sub_info = [[item,index] for item in path_list]
     info.extend(sub_info)
   
@@ -35,7 +35,11 @@ def make_label_csv(input_path,csv_path):
 
 if __name__ == "__main__":
   
-  input_path = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/train'
-  csv_path = './shuffle_crop_label.csv'
+  input_path = '/staff/shijun/torch_projects/Brain_CLS/dataset/post_data/train'
+  csv_path = './post_shuffle_label.csv'
+  make_label_csv(input_path,csv_path)
+
+  input_path = '/staff/shijun/torch_projects/Brain_CLS/dataset/post_crop_data/train'
+  csv_path = './post_shuffle_crop_label.csv'
 
   make_label_csv(input_path,csv_path)

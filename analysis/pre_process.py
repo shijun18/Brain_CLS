@@ -64,21 +64,28 @@ def class_split_multiply(csv_path,base_path,threshold=0.7):
     return path_list
     
 
-def get_class_split_multiply():
+def get_class_split_multiply(threshold=0.75):
     data_path = []
-    ad_base = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/train/AD/' 
+    ad_base = '/staff/shijun/torch_projects/Brain_CLS/dataset/post_data/train/AD/' 
     ad_csv = "/staff/shijun/torch_projects/Brain_CLS/analysis/sim_csv/AD_merge.csv"
-    ad_path = class_split_multiply(ad_csv,ad_base,threshold=0.7)
+    ad_path = class_split_multiply(ad_csv,ad_base,threshold=threshold)
     data_path.extend(ad_path)
     # print(ad_path)
     print(len(ad_path))
 
-    cn_base = '/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/train/CN/' 
+    cn_base = '/staff/shijun/torch_projects/Brain_CLS/dataset/post_data/train/CN/' 
     cn_csv = "/staff/shijun/torch_projects/Brain_CLS/analysis/sim_csv/CN_merge.csv"
-    cn_path = class_split_multiply(cn_csv,cn_base,threshold=0.7)
+    cn_path = class_split_multiply(cn_csv,cn_base,threshold=threshold)
     data_path.extend(cn_path)
     # print(cn_path)
     print(len(cn_path))
+
+    mci_base = '/staff/shijun/torch_projects/Brain_CLS/dataset/post_data/train/MCI/' 
+    mci_csv = "/staff/shijun/torch_projects/Brain_CLS/analysis/sim_csv/MCI_merge.csv"
+    mci_path = class_split_multiply(mci_csv,mci_base,threshold=threshold)
+    data_path.extend(mci_path)
+    # print(mci_path)
+    print(len(mci_path))
     random.shuffle(data_path)
 
     return data_path
@@ -115,7 +122,7 @@ def get_cross_val_by_class(path_list,fold_num,current_fold):
 
 
 if __name__ == "__main__":
-    data_path = get_class_split_multiply()
+    data_path = get_class_split_multiply(threshold=0.75)
     # print(data_path)
     print(len(data_path))
     train_path,val_path = get_cross_val_by_class(data_path,5,5)

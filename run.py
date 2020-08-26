@@ -8,8 +8,14 @@ from config import INIT_TRAINER, SETUP_TRAINER, VERSION, CURRENT_FOLD, FOLD_NUM,
 import time
 import torch
 import numpy as np
+import random
 
 from analysis.pre_process import get_class_split_multiply,get_cross_val_by_class
+
+RULE = {0:"AD",
+        1:"CN",
+        2:"MCI"
+        }
 
 def get_cross_validation(path_list, fold_num, current_fold):
 
@@ -45,14 +51,21 @@ if __name__ == "__main__":
                         help='choose the mode', type=str)
     parser.add_argument('-s', '--save', default='no', choices=['no', 'n', 'yes', 'y'],
                         help='save the forward middle features or not', type=str)
-    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/pre_crop_data/test/AD&CN',
+    parser.add_argument('-p', '--path', default='/staff/shijun/torch_projects/Brain_CLS/dataset/post_data/test/AD&CN&MCI',
                         help='the directory path of input image', type=str)
     args = parser.parse_args()
-
+    
+    label_dict = {}
     # Set data path & classifier
     # csv_path = './converter/pre_0.80_shuffle_crop_label.csv'
-    csv_path = './converter/shuffle_crop_label.csv'
-    label_dict = csv_reader_single(csv_path, key_col='id', value_col='label')
+    pre_csv_path = './converter/shuffle_label.csv'
+    pre_label_dict = csv_reader_single(pre_csv_path, key_col='id', value_col='label')
+
+    post_csv_path = './converter/post_shuffle_label.csv'
+    post_label_dict = csv_reader_single(post_csv_path, key_col='id', value_col='label')
+
+    label_dict.update(pre_label_dict)
+    label_dict.update(post_label_dict)
 
     if args.mode != 'crs_val_train' and args.mode != 'inf_cross_val':
         classifier = Pet_Classifier(**INIT_TRAINER)
@@ -61,8 +74,10 @@ if __name__ == "__main__":
     # Training with cross validation
     ###############################################
     if args.mode == 'train_cross_val':
-        # path_list = list(label_dict.keys())
-        path_list = get_class_split_multiply()
+        path_list = list(label_dict.keys())
+        random.shuffle(path_list)
+        print("dataset length is %d"%len(path_list))
+        # path_list = get_class_split_multiply()
 
         loss_list = []
         acc_list = []
@@ -74,10 +89,10 @@ if __name__ == "__main__":
             if current_fold == 0:
                 print(get_parameter_number(classifier.net))
 
-            # train_path, val_path = get_cross_validation(
-            #     path_list, FOLD_NUM, current_fold)
-            train_path, val_path = get_cross_val_by_class(
+            train_path, val_path = get_cross_validation(
                 path_list, FOLD_NUM, current_fold)
+            # train_path, val_path = get_cross_val_by_class(
+            #     path_list, FOLD_NUM, current_fold)
             SETUP_TRAINER['train_path'] = train_path
             SETUP_TRAINER['val_path'] = val_path
             SETUP_TRAINER['label_dict'] = label_dict
@@ -98,6 +113,8 @@ if __name__ == "__main__":
     ###############################################
     elif args.mode == 'train':
         path_list = list(label_dict.keys())
+        random.shuffle(path_list)
+        print("dataset length is %d"%len(path_list))
 
         train_path, val_path = get_cross_validation(
             path_list, FOLD_NUM, CURRENT_FOLD)
@@ -115,7 +132,9 @@ if __name__ == "__main__":
     # Testing
     ###############################################
     elif args.mode == 'test':
-        test_path = list(label_dict.keys())[1600:]
+        path_list = list(label_dict.keys())
+        random.shuffle(path_list)
+        test_path = path_list[10000:]
         save_path = './analysis/result/{}_test.csv'.format(VERSION)
 
         start_time = time.time()
@@ -161,7 +180,7 @@ if __name__ == "__main__":
         info = {}
         info['uuid'] = [os.path.splitext(os.path.basename(case))[
             0] for case in test_path]
-        info['label'] = ['AD' if case == 0 else 'CN' for case in result['pred']]
+        info['label'] = [RULE[case] for case in result['pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path, index=False)
@@ -172,9 +191,8 @@ if __name__ == "__main__":
     elif args.mode == 'inf_cross_val':
         test_path = [os.path.join(args.path, case)
                      for case in os.listdir(args.path)]
-        save_path_vote = './analysis/result/{}_submission_vote.csv'.format(
-            VERSION)
-        save_path = './analysis/result/{}_submission_ave.csv'.format(VERSION)
+        save_path_vote = './analysis/result/{}_new_submission_vote.csv'.format(VERSION)
+        save_path = './analysis/result/{}_new_submission_ave.csv'.format(VERSION)
 
         result = {
             'pred': [],
@@ -200,23 +218,21 @@ if __name__ == "__main__":
         result['prob'].extend(avg_output.tolist())
 
         result['pred'].extend(np.argmax(avg_output, 1).tolist())
-        result['vote_pred'].extend(
-            (np.sum(all_vote_output, 0) > len(WEIGHT_PATH_LIST)//2).astype(int).tolist())
+        vote_array = np.asarray(all_vote_output).astype(int)
+        result['vote_pred'].extend([max(list(vote_array[:,i]),key=list(vote_array[:,i]).count) for i in range(vote_array.shape[1])])
 
         print('run time:%.4f' % (time.time()-start_time))
 
         info = {}
-        info['uuid'] = [os.path.splitext(os.path.basename(case))[
-            0] for case in test_path]
-        info['label'] = ['AD' if case == 0 else 'CN' for case in result['pred']]
+        info['uuid'] = [os.path.splitext(os.path.basename(case))[0] for case in test_path]
+        info['label'] = [RULE[case] for case in result['pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path, index=False)
 
         info = {}
-        info['uuid'] = [os.path.splitext(os.path.basename(case))[
-            0] for case in test_path]
-        info['label'] = ['AD' if case == 0 else 'CN' for case in result['vote_pred']]
+        info['uuid'] = [os.path.splitext(os.path.basename(case))[0] for case in test_path]
+        info['label'] = [RULE[case] for case in result['vote_pred']]
         info['prob'] = result['prob']
         csv_file = pd.DataFrame(info)
         csv_file.to_csv(save_path_vote, index=False)

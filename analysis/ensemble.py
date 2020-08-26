@@ -9,9 +9,8 @@ def vote_ensemble(csv_path_list,save_path,col='label'):
     ensemble_list.append(csv_file[col].values.tolist())
 
   result['uuid'] = csv_file['uuid'].values.tolist()
-  ensemble_array = np.array(ensemble_list)
-  final_label = list((np.sum(ensemble_array,axis=0)>(len(csv_path_list)//2)).astype(np.uint8))
-  result['label'] = ['AD' if case == 0 else 'CN' for case in final_label]
+  vote_array = np.array(ensemble_list)
+  result['label'] = [max(list(vote_array[:,i]),key=list(vote_array[:,i]).count) for i in range(vote_array.shape[1])]
   
   final_csv = pd.DataFrame(result)
   final_csv.to_csv(save_path,index=False)
@@ -19,8 +18,24 @@ def vote_ensemble(csv_path_list,save_path,col='label'):
 
 if __name__ == "__main__":
   
-  save_path = './45ensem_submission.csv'
-  # csv_path_list = ['./result/v2.2_submission.csv','./result/v3.0_submission.csv','./result/v3.0.1_submission.csv',
-  # './result/v3.0.2_submission.csv','./result/v3.0.3_submission.csv']
-  csv_path_list = ['./result/v5.1_submission.csv','./result/v4.1_submission.csv','./result/v4.0_submission.csv']
-  vote_ensemble(csv_path_list,save_path)
+  save_path = './ensemble_csv/random_a1249ensem_submission.csv'
+  csv_path_list = ['./ensemble_csv/v1.0_submission_ave.csv','./ensemble_csv/v2.0_submission_ave.csv','./ensemble_csv/v4.0_submission_ave.csv','./ensemble_csv/v9.0_submission_ave.csv', './ensemble_csv/v7.0_submission_ave.csv', \
+                  './ensemble_csv/v1.0_submission_vote.csv', './ensemble_csv/v2.0_submission_vote.csv','./ensemble_csv/v4.0_submission_vote.csv','./ensemble_csv/v9.0_submission_vote.csv', './ensemble_csv/v7.0_submission_vote.csv', \
+                   './ensemble_csv/v6.0_submission_ave.csv','./ensemble_csv/v6.0_submission_vote.csv','./ensemble_csv/v24_0.9227.csv',]
+  reorder = {
+    'index_list':[],
+    'diff':[]
+  }
+  from itertools import combinations
+  for r in range(3,len(csv_path_list)):
+    for index in combinations(range(len(csv_path_list)),r):
+      print(index)
+      reorder['index_list'].append(index)
+      tmp_csv_path_list = [csv_path_list[i] for i in index]
+      vote_ensemble(tmp_csv_path_list,save_path)
+      from post_process import diff_csv
+      diff = diff_csv(save_path,'./ensemble_csv/post_v24_submission_0.9227_0.695.csv','label')
+      reorder['diff'].append(diff)
+  
+  final_csv = pd.DataFrame(reorder)
+  final_csv.to_csv('./diff.csv',index=False)

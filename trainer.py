@@ -412,7 +412,7 @@ class Pet_Classifier(object):
         }
 
         with torch.no_grad():
-            for step, sample in enumerate(test_loader):
+            for _, sample in enumerate(test_loader):
                 data = sample['image']
                 data = data.cuda()
 
@@ -438,9 +438,9 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
-            tr.RandomHorizontalFlip(p=0.5),
-            tr.RandomVerticalFlip(p=0.5),
+            # RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            # tr.RandomHorizontalFlip(p=0.5),
+            # tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize(self.mean, self.std)
         ])
@@ -451,7 +451,7 @@ class Pet_Classifier(object):
         vote_output = []
 
         with torch.no_grad():
-            for step, sample in enumerate(test_dataset):
+            for _, sample in enumerate(test_dataset):
                 data = sample['image']
 
                 tta_output = []
@@ -476,8 +476,7 @@ class Pet_Classifier(object):
                     binary_output.append(np.argmax(output))
 
                 prob_output.append(np.mean(tta_output, axis=0))
-                vote_output.append(np.sum(binary_output) >
-                                   int(np.floor(tta_times/2)))
+                vote_output.append(max(binary_output,key=binary_output.count))
 
         return prob_output, vote_output
 
@@ -510,7 +509,14 @@ class Pet_Classifier(object):
             from model.simple_net import tiny_net
             net = tiny_net(input_channels=self.channels,
                            num_classes=self.num_classes)
-
+        elif net_name == 'densenet121':
+            from model.densenet import densenet121
+            net = densenet121(input_channels=self.channels,
+                           num_classes=self.num_classes)
+        elif net_name == 'vgg16':
+            from model.vgg import vgg16
+            net = vgg16(input_channels=self.channels,
+                           num_classes=self.num_classes)
         return net
 
     def _get_loss(self, loss_fun, class_weight=None):
@@ -540,6 +546,9 @@ class Pet_Classifier(object):
         elif lr_scheduler == 'MultiStepLR':
             lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 optimizer, self.milestones, gamma=self.gamma)
+        elif lr_scheduler == 'CosineAnnealingLR':
+            lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                            optimizer, T_max=5)
         return lr_scheduler
 
     def _get_pre_trained(self, weight_path):

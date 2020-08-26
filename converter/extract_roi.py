@@ -81,12 +81,12 @@ def extract_roi(input_path,save_path):
           os.makedirs(temp_path)
         extract_roi(item.path,temp_path)  
 
-      elif item.is_file() and os.path.splitext(item.name)[1] == '.png':
+      elif item.is_file() and os.path.splitext(item.name)[1] in ['.png','.jpg']:
         temp_path = os.path.join(save_path,item.name)
         crop_by_edge_single(item.path,temp_path)
         print("%s done!" % item.path)
   
-  elif os.path.isfile(input_path) and os.path.splitext(os.path.basename(input_path))[1] == '.png':
+  elif os.path.isfile(input_path) and os.path.splitext(os.path.basename(input_path))[1] in ['.png','.jpg']:
     if not os.path.exists(save_path):
       os.makedirs(save_path)
     name = os.path.basename(input_path)
@@ -99,6 +99,6 @@ def extract_roi(input_path,save_path):
 
 if __name__ == "__main__":
   
-  input_path = '../dataset/pre_data/'
-  save_path = '../dataset/pre_crop_edge/'
+  input_path = '../dataset/post_data/'
+  save_path = '../dataset/post_crop_data/'
   extract_roi(input_path,save_path)

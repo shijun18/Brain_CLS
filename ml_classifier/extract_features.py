@@ -1,7 +1,5 @@
 import os
-<<<<<<< Updated upstream
 import pandas as pd 
-=======
 import pandas as pd
 import cv2
 from skimage.feature import greycomatrix,greycoprops
@@ -31,15 +29,12 @@ def get_hog_feature(images):
 
     return fog_feature
 
->>>>>>> Stashed changes
 
 
 
 def extract_features(input_csv,save_csv):
-<<<<<<< Updated upstream
-  df = pd.read_csv(input_csv)
+    df = pd.read_csv(input_csv)
 
-=======
     grey_features = ['contrast','dissimilarity','homogeneity','correlation']
     # grey_features = ['ASM','energy']
     df = pd.read_csv(input_csv)
@@ -62,19 +57,12 @@ def extract_features(input_csv,save_csv):
     #     df.insert(0,feature_name,list(np.array(hog_feature)[:,i]))
     print("Extraction finished!")
     df.to_csv(save_csv,index=False)
->>>>>>> Stashed changes
 
 
 
 if __name__ == "__main__":
-<<<<<<< Updated upstream
 
-  input_csv = '../converter/shuffle_crop_label.csv'
-  save_csv = '../converter/shuffle_crop_label_features.csv'
+  input_csv = '../converter/post_shuffle_crop_label.csv'
+  save_csv = '../converter/post_shuffle_crop_label_features.csv'
   
   extract_features(input_csv,save_csv)
-=======
-    input_csv = '../converter/shuffle_crop_label.csv'
-    save_csv = './grey_ccdh_features.csv'
-    extract_features(input_csv,save_csv)
->>>>>>> Stashed changes
