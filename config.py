@@ -2,9 +2,9 @@
 __all__ = ['resnet18', 'se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net', 'resnet34', 'resnet50','densenet121','vgg16']
 
 
-NET_NAME = 'se_resnet18'
-VERSION = 'v2.0'
-DEVICE = '4'
+NET_NAME = 'densenet121'
+VERSION = 'v8.0'
+DEVICE = '7'
 # Must be True when pre-training and inference
 PRE_TRAINED = True 
 # 1,2,3,4

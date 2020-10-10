@@ -112,7 +112,7 @@ class Pet_Classifier(object):
         # dataloader setting
         train_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
@@ -324,7 +324,7 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
@@ -389,7 +389,7 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
             tr.RandomHorizontalFlip(p=0.5),
             tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
@@ -438,7 +438,7 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            # RandomRotate([-135, -90, -45, 0, 45, 90, 135]),
+            # RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
             # tr.RandomHorizontalFlip(p=0.5),
             # tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),

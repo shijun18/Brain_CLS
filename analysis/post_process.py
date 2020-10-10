@@ -42,7 +42,7 @@ if __name__ == "__main__":
         class_result = union_find(data,threshold=threshold)
         print("types = %d"%len(set(class_result)))
 
-        input_path = './ensemble_csv/v24_0.9227.csv'
+        input_path = './ensemble_csv/new_random_a29_ensem_submission.csv'
         input_df = pd.read_csv(input_path)
         cluster_dict = merge_class(class_result) 
         save_path = './ensemble_csv/post_{}'.format(os.path.basename(input_path))   

@@ -20,7 +20,7 @@ def class_split_single(csv_path,base_path,threshold=0.8):
     return out_path
 
 
-def get_class_split_single():
+def get_class_split_single(threshold=0.7):
     
     csv_info = []
     
@@ -57,9 +57,9 @@ def class_split_multiply(csv_path,base_path,threshold=0.7):
     path_list = []
     for key in cluster_dict.keys():
         item = cluster_dict[key]
-        if len(item) > 20:
-            random.shuffle(item)
-            item = item[:20]
+        # if len(item) > 20:
+        #     random.shuffle(item)
+        #     item = item[:20]
         path_list.append([os.path.join(base_path,str(case)+ '.png') for case in item])
     return path_list
     
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     data_path = get_class_split_multiply(threshold=0.75)
     # print(data_path)
     print(len(data_path))
-    train_path,val_path = get_cross_val_by_class(data_path,5,5)
+    train_path,val_path = get_cross_val_by_class(data_path,9,1)
     
 
     

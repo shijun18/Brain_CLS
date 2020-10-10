@@ -18,7 +18,7 @@ def get_weight_path(ckpt_path):
         if fold.is_dir():
             weight_path = os.listdir(fold.path)
             weight_path.sort(key=lambda x:int(x.split('-')[0].split(':')[-1]))
-            path_list.append(os.path.join(fold.path,weight_path[-1]))
-            print(os.path.join(fold.path,weight_path[-1]))
+            path_list.append(os.path.join(fold.path,weight_path[-3]))
+            print(os.path.join(fold.path,weight_path[-3]))
     
     return path_list
