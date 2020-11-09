@@ -1,12 +1,12 @@
  
-__all__ = ['resnet18','resnet34', 'resnet50','resnest18','resnest50','se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net','densenet121','vgg16']
+__all__ = ['resnet18','resnet34', 'resnet50','resnest18','resnest50','se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net','densenet121','vgg16','res2net50','res2net18','res2next50','res2next18','efficientnet-b7']
 
 
-NET_NAME = 'resnest18'
-VERSION = 'v4.0'
-DEVICE = '7'
+NET_NAME = 'res2next50'
+VERSION = 'v14.0'
+DEVICE = '0'
 # Must be True when pre-training and inference
-PRE_TRAINED = True 
+PRE_TRAINED = False 
 # 1,2,3,4
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
@@ -39,7 +39,7 @@ INIT_TRAINER = {
     'num_workers': 2,
     'device': DEVICE,
     'pre_trained': PRE_TRAINED,
-    'weight_path': WEIGHT_PATH[NET_NAME],
+    'weight_path': WEIGHT_PATH,
     'weight_decay': 0,
     'momentum': 0.9,
     'mean': (0.2223,0.2223,0.2223),

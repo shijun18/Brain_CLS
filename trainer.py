@@ -90,11 +90,12 @@ class Pet_Classifier(object):
         output_dir = os.path.join(output_dir, "fold"+str(cur_fold))
         log_dir = os.path.join(log_dir, "fold"+str(cur_fold))
 
-        remove_dir(output_dir)
-        make_dir(output_dir)
+        if not self.pre_trained:
+          remove_dir(output_dir)
+          make_dir(output_dir)
 
-        remove_dir(log_dir)
-        make_dir(log_dir)
+          remove_dir(log_dir)
+          make_dir(log_dir)
 
         self.writer = SummaryWriter(log_dir)
         self.global_step = self.start_epoch * \
@@ -520,12 +521,34 @@ class Pet_Classifier(object):
         elif net_name == 'densenet121':
             from model.densenet import densenet121
             net = densenet121(input_channels=self.channels,
-                           num_classes=self.num_classes)
+                              num_classes=self.num_classes)
         elif net_name == 'vgg16':
             from model.vgg import vgg16
             net = vgg16(input_channels=self.channels,
-                           num_classes=self.num_classes)
+                        num_classes=self.num_classes)
+        elif net_name == 'res2net50':
+            from model.res2net import res2net50
+            net = res2net50(input_channels=self.channels,
+                        	num_classes=self.num_classes)
+        elif net_name == 'res2net18':
+                from model.res2net import res2net18
+                net = res2net18(input_channels=self.channels,
+                              num_classes=self.num_classes)
+        elif net_name == 'res2next50':
+                from model.res2next import res2next50
+                net = res2next50(input_channels=self.channels,
+                              num_classes=self.num_classes)
+        elif net_name == 'res2next18':
+                from model.res2next import res2next18
+                net = res2next18(input_channels=self.channels,
+                                num_classes=self.num_classes)
+        elif 'efficientnet' in net_name:
+                from model.efficientnet import EfficientNet
+                net = EfficientNet.from_name(model_name=net_name,
+                                            in_channels=self.channels,
+                                            num_classes=self.num_classes)
         return net
+
 
     def _get_loss(self, loss_fun, class_weight=None):
         if class_weight is not None:

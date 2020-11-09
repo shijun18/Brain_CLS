@@ -67,7 +67,7 @@ if __name__ == "__main__":
     label_dict.update(pre_label_dict)
     label_dict.update(post_label_dict)
 
-    if args.mode != 'crs_val_train' and args.mode != 'inf_cross_val':
+    if args.mode != 'train_cross_val' and args.mode != 'inf_cross_val':
         classifier = Pet_Classifier(**INIT_TRAINER)
         print(get_parameter_number(classifier.net))
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         loss_list = []
         acc_list = []
 
-        for current_fold in range(9, FOLD_NUM+1):
+        for current_fold in range(1, FOLD_NUM+1):
             print("=== Training Fold ", current_fold, " ===")
             classifier = Pet_Classifier(**INIT_TRAINER)
 
