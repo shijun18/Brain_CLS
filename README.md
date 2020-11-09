@@ -23,7 +23,7 @@
 
 
 
-### 复赛
+## 复赛
 - 训练集：10000张脑部PET图像，格式为png，AD:CN:MCI=3000:3000:4000
 - 评价标准：precision、recall和F1-score，最终结果以**F1-score**为主
 - 测试集：2000张脑部PET图像，格式为png
