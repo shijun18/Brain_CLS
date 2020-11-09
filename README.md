@@ -16,7 +16,7 @@
 
 ## 初赛
 
-- 训练集：2000张脑部PET图像，格式为png，AD:CN=1000:1000，各1000张
+- 训练集：2000张脑部PET图像，格式为png，AD:CN=1000:1000
 - 评价标准：precision、recall和F1-score，最终结果以**F1-score**为主
 - 测试集：1000张脑部PET图像，格式为png
 - 提交形式：.csv文件，uuid + label (AD or CN)
