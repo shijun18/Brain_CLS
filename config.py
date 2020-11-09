@@ -1,9 +1,9 @@
  
-__all__ = ['resnet18', 'se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net', 'resnet34', 'resnet50','densenet121','vgg16']
+__all__ = ['resnet18','resnet34', 'resnet50','resnest18','resnest50','se_resnet18', 'se_resnet10', 'simple_net', 'tiny_net','densenet121','vgg16']
 
 
-NET_NAME = 'densenet121'
-VERSION = 'v8.0'
+NET_NAME = 'resnest18'
+VERSION = 'v4.0'
 DEVICE = '7'
 # Must be True when pre-training and inference
 PRE_TRAINED = True 
@@ -11,24 +11,20 @@ PRE_TRAINED = True
 CURRENT_FOLD = 1
 GPU_NUM = len(DEVICE.split(','))
 FOLD_NUM = 9
-TTA_TIMES = 9
+TTA_TIMES = 17
 
-WEIGHT_PATH = {
-  'resnet18':'./ckpt/{}/'.format(VERSION),
-  'se_resnet18':'./ckpt/{}/'.format(VERSION),
-  'se_resnet10':'./ckpt/{}/'.format(VERSION),
-  'simple_net':'./ckpt/{}/'.format(VERSION),
-  'tiny_net':'./ckpt/{}/'.format(VERSION),
-  'resnet34':'./ckpt/{}/fold1/fold:1 epoch:141-train_loss:0.03354-val_loss:0.12624-train_acc:0.98865-val_acc:0.96417.pth'.format(VERSION),
-  'resnet50':'./ckpt/{}/'.format(VERSION),
-  'densenet121':'./ckpt/{}/'.format(VERSION),
-  'vgg16':'./ckpt/{}/'.format(VERSION),
-}
 
-from utils import get_weight_path,make_dir
-make_dir('./ckpt/{}/'.format(VERSION))
-WEIGHT_PATH_LIST = get_weight_path('./ckpt/{}/'.format(VERSION))
 
+from utils import get_weight_path,get_weight_list
+
+CKPT_PATH = './ckpt/{}/fold{}'.format(VERSION,str(CURRENT_FOLD))
+WEIGHT_PATH = get_weight_path(CKPT_PATH)
+print(WEIGHT_PATH)
+
+if PRE_TRAINED:
+    WEIGHT_PATH_LIST = get_weight_list('./ckpt/{}/'.format(VERSION))
+else:
+    WEIGHT_PATH_LIST = None
 
 # Arguments when trainer initial
 INIT_TRAINER = {

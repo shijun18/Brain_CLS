@@ -438,9 +438,9 @@ class Pet_Classifier(object):
 
         test_transformer = transforms.Compose([
             tr.Resize(size=self.input_shape),
-            # RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
-            # tr.RandomHorizontalFlip(p=0.5),
-            # tr.RandomVerticalFlip(p=0.5),
+            RandomRotate([-135, -90, -45, 0, 45, 90, 135, 180]),
+            tr.RandomHorizontalFlip(p=0.5),
+            tr.RandomVerticalFlip(p=0.5),
             tr.ToTensor(),
             tr.Normalize(self.mean, self.std)
         ])
@@ -492,6 +492,14 @@ class Pet_Classifier(object):
         elif net_name == 'resnet50':
             from model.resnet import resnet50
             net = resnet50(input_channels=self.channels,
+                           num_classes=self.num_classes)
+        elif net_name == 'resnest18':
+            from model.resnest import resnest18
+            net = resnest18(input_channels=self.channels,
+                           num_classes=self.num_classes)
+        elif net_name == 'resnest50':
+            from model.resnest import resnest50
+            net = resnest50(input_channels=self.channels,
                            num_classes=self.num_classes)
         elif net_name == 'se_resnet18':
             from model.se_resnet import se_resnet18

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     
     label_dict = {}
     # Set data path & classifier
-    # csv_path = './converter/pre_0.80_shuffle_crop_label.csv'
+    
     pre_csv_path = './converter/shuffle_label.csv'
     pre_label_dict = csv_reader_single(pre_csv_path, key_col='id', value_col='label')
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         path_list = list(label_dict.keys())
         random.shuffle(path_list)
         print("dataset length is %d"%len(path_list))
-        # path_list = get_class_split_multiply()
+        # path_list = get_class_split_multiply() # split by class
 
         loss_list = []
         acc_list = []
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             train_path, val_path = get_cross_validation(
                 path_list, FOLD_NUM, current_fold)
             # train_path, val_path = get_cross_val_by_class(
-            #     path_list, FOLD_NUM, current_fold)
+            #     path_list, FOLD_NUM, current_fold) # split by class
             SETUP_TRAINER['train_path'] = train_path
             SETUP_TRAINER['val_path'] = val_path
             SETUP_TRAINER['label_dict'] = label_dict

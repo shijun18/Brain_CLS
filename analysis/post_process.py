@@ -34,7 +34,7 @@ def diff_csv(pred_csv,target_csv,pred_key='post_label',target_key='label'):
 
 if __name__ == "__main__":
 
-    threshold = 0.67
+    threshold = 0.695
     threshold_list = []
     for i in range(300):
         print("*****%.3f*****"%threshold)
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         class_result = union_find(data,threshold=threshold)
         print("types = %d"%len(set(class_result)))
 
-        input_path = './ensemble_csv/new_random_a29_ensem_submission.csv'
+        input_path = './your_csv.csv'
         input_df = pd.read_csv(input_path)
         cluster_dict = merge_class(class_result) 
-        save_path = './ensemble_csv/post_{}'.format(os.path.basename(input_path))   
+        save_path = './post_{}'.format(os.path.basename(input_path))   
 
         post_process(input_df,cluster_dict,save_path)
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         if max_num <= 20:
             print(AD_num,CN_num,MCI_num)
             threshold_list.append(threshold)
-            target_csv = './ensemble_csv/post_v24_submission_0.9227_0.695.csv'
+            target_csv = './compare_csv.csv' # It is an option to choose the csv that you have submitted
             diff = diff_csv(save_path,target_csv)
         
         threshold += 0.001

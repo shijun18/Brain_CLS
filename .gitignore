@@ -6,5 +6,7 @@ ckpt/
 .vscode/
 __pycache__/
 result/
+ensemble_csv/
+sim_csv/
 *.csv
 *.txt
